@@ -1,0 +1,221 @@
+
+/* Existing styles */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('360-bal-logo-no-text-transparent.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.clocks-section {
+    flex: 1;
+    min-width: 300px;
+}
+
+.clock-table {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    align-items: start;  /* Add this line */
+}
+
+.clock-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    height: 100%;  /* Add this line */
+    justify-content: flex-start;  /* Add this line */
+}
+.clock-header {
+    font-weight: bold;
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.highlight {
+    font-weight: bold;
+    color: #d9534f;
+}
+
+.time-inputs {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.time-inputs input[type="number"] {
+    width: 45px;
+    text-align: center;
+    font-size: 16px;
+    padding: 5px;
+}
+
+.table-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.table-container {
+    width: 250px;
+}
+
+.table-container h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.offset-table {
+    width: 100%;
+}
+
+.offset-table {
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.offset-table th,
+.offset-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.button-container {
+    text-align: center;
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.ampm {
+    margin-left: 5px;
+    font-size: 14px;
+    min-width: 30px;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .clocks-section {
+        width: 100%;
+    }
+
+    .clock-table {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+        padding: 10px;
+        margin: 10px auto;
+        width: 100%;
+    }
+
+    .time-inputs input[type="number"] {
+        width: 40px;
+        font-size: 14px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    button {
+        width: 80%;
+        max-width: 200px;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .table-wrapper {
+        margin-top: 10px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .table-container {
+        width: 80%;
+        max-width: 250px;
+    }
+
+    .clock-header {
+        font-size: 14px;
+        min-height: 30px;
+        text-align: center;
+    }
+
+    .ampm {
+        font-size: 12px;
+        min-width: 25px;
+    }
+
+    .offset-table {
+        margin: 0 auto;
+    }
+}
+
+/* Add an even smaller breakpoint for very narrow screens */
+@media (max-width: 480px) {
+    .clock-table {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}

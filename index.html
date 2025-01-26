@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Zone Clocks</title>
+    <link rel="icon" type="image/x-icon" href="images/clock.ico">
+    <link rel="stylesheet" href="clocks.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="clocks-section">
+            <div class="clock-table">
+                <div class="clock-column">
+                    <div class="clock-header highlight">Hawaii (HST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="hawaii-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="hawaii-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
+                    <div class="clock-header">Alaska (AKST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="alaska-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="alaska-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
+                    <div class="clock-header">US Pacific (PST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="us-pacific-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="us-pacific-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column" id="arizona-clock" style="display: none;">
+                    <div class="clock-header">Arizona (MST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="arizona-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="arizona-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
+                    <div class="clock-header">US Mountain (MST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="us-mountain-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="us-mountain-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
+                    <div class="clock-header">US Central (CST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="us-central-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="us-central-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
+                    <div class="clock-header">US Eastern (EST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="us-eastern-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="us-eastern-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
+                    <div class="clock-header">New Zealand (NZDT)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="new-zealand-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="new-zealand-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button id="reset-button">Reset Clocks</button>
+                <button id="increment-button">+15 Minutes</button>
+                <button id="decrement-button">-15 Minutes</button>
+                <button id="format-toggle">12/24 Hour Format</button>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-container" id="standard-table">
+                    <h3>Standard Time Offsets</h3>
+                    <table class="offset-table">
+                        <tr><td>Hawaii (HST)</td><td>+0</td></tr>
+                        <tr><td>Alaska (AKST)</td><td>+1</td></tr>
+                        <tr><td>US Pacific (PST)</td><td>+2</td></tr>
+                        <tr><td>US Mountain (MST)</td><td>+3</td></tr>
+                        <tr><td>US Central (CST)</td><td>+4</td></tr>
+                        <tr><td>US Eastern (EST)</td><td>+5</td></tr>
+                        <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
+                    </table>
+                </div>
+            
+                <div class="table-container" id="dst-table" style="display: none;">
+                    <h3>Daylight Time Offsets</h3>
+                    <table class="offset-table">
+                        <tr><td>Hawaii (HST)</td><td>+0</td></tr>
+                        <tr><td>Alaska (AKDT)</td><td>+2</td></tr>
+                        <tr><td>US Pacific (PDT)</td><td>+3</td></tr>
+                        <tr><td>Arizona (MST)</td><td>+2</td></tr>
+                        <tr><td>US Mountain (MDT)</td><td>+4</td></tr>
+                        <tr><td>US Central (CDT)</td><td>+5</td></tr>
+                        <tr><td>US Eastern (EDT)</td><td>+6</td></tr>
+                        <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // All the existing script content remains the same, just add these new functions and modifications:
+        function getTimeZones() {
+            // Base timezone configuration
+            const zones = [
+                { id: 'hawaii', name: 'HST', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', offset: 0 },
+                { id: 'alaska', name: 'AKST', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', offset: 1 },
+                { id: 'us-pacific', name: 'PST', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', offset: 2 },
+                { id: 'arizona', name: 'MST', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', offset: 2 }, // One hour behind Mountain during DST
+                { id: 'us-mountain', name: 'MST', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', offset: 3 },
+                { id: 'us-central', name: 'CST', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', offset: 4 },
+                { id: 'us-eastern', name: 'EST', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', offset: 5 },
+                { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', offset: 23 }
+            ];
+            
+            // Adjust offsets if DST is in effect
+            if (isDST()) {
+                return zones.map(tz => {
+                    if (tz.id === 'arizona') {
+                        return { ...tz, offset: 2 }; // Keep Arizona at MST
+                    } else if (['us-pacific', 'us-mountain', 'us-central', 'us-eastern'].includes(tz.id)) {
+                        return { ...tz, offset: tz.offset + 1 }; // Add 1 hour for DST
+                    }
+                    return tz;
+                });
+            }
+            return zones;
+        }
+
+        function isDST() {
+            const today = new Date();
+            const year = today.getFullYear();
+            
+            // DST starts second Sunday in March at 2:00 AM
+            const marchSecondSunday = new Date(year, 2, 1);
+            marchSecondSunday.setDate(1 + (14 - marchSecondSunday.getDay()) % 7);
+            const dstStart = new Date(year, 2, marchSecondSunday.getDate(), 2, 0, 0);
+            
+            // DST ends first Sunday in November at 2:00 AM
+            const novFirstSunday = new Date(year, 10, 1);
+            novFirstSunday.setDate(1 + (7 - novFirstSunday.getDay()) % 7);
+            const dstEnd = new Date(year, 10, novFirstSunday.getDate(), 2, 0, 0);
+            
+            // Check if current date is within DST period
+            return today >= dstStart && today < dstEnd;
+        }
+
+        function toggleArizonaClock() {
+            const arizonaClock = document.getElementById('arizona-clock');
+            const standardTable = document.getElementById('standard-table');
+            const dstTable = document.getElementById('dst-table');
+            
+            if (isDST()) {
+                arizonaClock.style.display = '';
+                standardTable.style.display = 'none';
+                dstTable.style.display = 'block';
+            } else {
+                arizonaClock.style.display = 'none';
+                standardTable.style.display = 'block';
+                dstTable.style.display = 'none';
+            }
+        }
+
+        // Initialize timeZones with the correct configuration
+        const timeZones = getTimeZones();
+
+        // Modify the updateClocks function
+        const originalUpdateClocks = updateClocks;
+        updateClocks = function() {
+            const currentTimeZones = getTimeZones();
+            timeZones.length = 0;
+            timeZones.push(...currentTimeZones);
+            originalUpdateClocks();
+            toggleArizonaClock();
+        };
+
+        // Initial call to toggleArizonaClock
+        toggleArizonaClock();
+        let clockInterval;
+
+        function normalizeTime(hours, minutes, roundToFifteen = false) {
+            let totalMinutes = hours * 60 + minutes;
+            
+            // Only round to 15 minutes when manually adjusting
+            if (roundToFifteen) {
+                minutes = Math.round(minutes / 15) * 15;
+                totalMinutes = hours * 60 + minutes;
+            }
+            
+            while (totalMinutes < 0) totalMinutes += 24 * 60;
+            totalMinutes = totalMinutes % (24 * 60);
+            return {
+                hours: Math.floor(totalMinutes / 60),
+                minutes: totalMinutes % 60
+            };
+        }
+
+        let use24Hour = true;
+
+        function formatHour(hour, minutes) {
+            if (use24Hour) {
+                return hour;
+            } else {
+                const period = hour >= 12 ? 'PM' : 'AM';
+                hour = hour % 12;
+                return hour === 0 ? 12 : hour;
+            }
+        }
+
+        function updateTimeDisplay(hourInput, minuteInput, hours, minutes) {
+            const formattedHour = formatHour(hours, minutes);
+            hourInput.value = formattedHour;
+            minuteInput.value = String(minutes).padStart(2, '0');
+            
+            // Update AM/PM indicator if in 12-hour mode
+            const amPmSpan = hourInput.parentElement.querySelector('.ampm');
+            if (!use24Hour) {
+                if (!amPmSpan) {
+                    const span = document.createElement('span');
+                    span.className = 'ampm';
+                    span.textContent = hours >= 12 ? ' PM' : ' AM';
+                    hourInput.parentElement.appendChild(span);
+                } else {
+                    amPmSpan.textContent = hours >= 12 ? ' PM' : ' AM';
+                }
+            } else if (amPmSpan) {
+                amPmSpan.remove();
+            }
+        }
+
+        function updateClocks() {
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const hstTime = new Date(utc + (3600000 * -10));
+
+            const baseHours = hstTime.getHours();
+            const baseMinutes = hstTime.getMinutes();
+
+            timeZones.forEach(tz => {
+                const time = normalizeTime(baseHours, baseMinutes + (tz.offset * 60));
+                const hourInput = document.getElementById(tz.hourInput);
+                const minuteInput = document.getElementById(tz.minuteInput);
+                updateTimeDisplay(hourInput, minuteInput, time.hours, time.minutes);
+            });
+        }
+
+        function syncClocks(baseHours, baseMinutes) {
+            timeZones.forEach(tz => {
+                const time = normalizeTime(baseHours, baseMinutes + (tz.offset * 60), true);
+                const hourInput = document.getElementById(tz.hourInput);
+                const minuteInput = document.getElementById(tz.minuteInput);
+                updateTimeDisplay(hourInput, minuteInput, time.hours, time.minutes);
+            });
+        }
+
+        function startClocks() {
+            stopClocks();
+            updateClocks();
+            clockInterval = setInterval(updateClocks, 1000);
+        }
+
+        function stopClocks() {
+            if (clockInterval) {
+                clearInterval(clockInterval);
+                clockInterval = null;
+            }
+        }
+
+        function adjustTime(minutes) {
+            stopClocks();
+            const hawaiiHours = parseInt(document.getElementById('hawaii-hour').value) || 0;
+            const hawaiiMinutes = parseInt(document.getElementById('hawaii-minute').value) || 0;
+            const time = normalizeTime(hawaiiHours, hawaiiMinutes + minutes);
+            syncClocks(time.hours, time.minutes);
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.time-inputs input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                stopClocks();
+                
+                // Get the input ID and identify which clock was changed
+                const inputId = e.target.id;
+                const currentTz = timeZones.find(tz => 
+                    tz.hourInput === inputId || tz.minuteInput === inputId
+                );
+                
+                if (currentTz) {
+                    // Get the current input values for the changed timezone
+                    let hours = parseInt(document.getElementById(currentTz.hourInput).value) || 0;
+                    const minutes = parseInt(document.getElementById(currentTz.minuteInput).value) || 0;
+                    
+                    // Convert 12-hour format input to 24-hour if needed
+                    if (!use24Hour && input.id.endsWith('-hour')) {
+                        const amPmSpan = input.parentElement.querySelector('.ampm');
+                        const isPM = amPmSpan && amPmSpan.textContent.trim() === 'PM';
+                        if (hours === 12) {
+                            hours = isPM ? 12 : 0;
+                        } else if (isPM) {
+                            hours += 12;
+                        }
+                    }
+                    
+                    // Calculate back to Hawaii time
+                    const totalMinutes = hours * 60 + minutes - (currentTz.offset * 60);
+                    const hawaiiTime = normalizeTime(Math.floor(totalMinutes / 60), totalMinutes % 60, true);
+                    
+                    // Sync all clocks based on the new Hawaii time
+                    syncClocks(hawaiiTime.hours, hawaiiTime.minutes);
+                }
+            });
+        });
+
+        document.getElementById('reset-button').addEventListener('click', startClocks);
+        document.getElementById('increment-button').addEventListener('click', () => adjustTime(15));
+        document.getElementById('decrement-button').addEventListener('click', () => adjustTime(-15));
+        
+        document.getElementById('format-toggle').addEventListener('click', () => {
+            use24Hour = !use24Hour;
+            if (!clockInterval) {
+                // If clocks are stopped, update display without changing times
+                timeZones.forEach(tz => {
+                    const hourInput = document.getElementById(tz.hourInput);
+                    const minuteInput = document.getElementById(tz.minuteInput);
+                    const hours = parseInt(hourInput.value);
+                    const minutes = parseInt(minuteInput.value);
+                    // Convert from 12-hour to 24-hour if necessary
+                    let actualHours = hours;
+                    if (!use24Hour) {
+                        const amPmSpan = hourInput.parentElement.querySelector('.ampm');
+                        const isPM = amPmSpan && amPmSpan.textContent.trim() === 'PM';
+                        if (hours === 12) {
+                            actualHours = isPM ? 12 : 0;
+                        } else if (isPM) {
+                            actualHours += 12;
+                        }
+                    }
+                    updateTimeDisplay(hourInput, minuteInput, actualHours, minutes);
+                });
+            } else {
+                // If clocks are running, they'll update automatically
+                updateClocks();
+            }
+        });
+
+        // Start the clocks initially
+        startClocks();    
+        </script>
+    </body>
+</html>
