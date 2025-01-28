@@ -61,6 +61,13 @@
                     </div>
                 </div>
                 <div class="clock-column">
+                    <div class="clock-header">Philippines (PHT)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="philippines-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="philippines-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
+                <div class="clock-column">
                     <div class="clock-header">New Zealand (NZDT)</div>
                     <div class="time-inputs">
                         <input type="number" id="new-zealand-hour" min="0" max="23" step="1"> :
@@ -86,6 +93,7 @@
                         <tr><td>US Mountain (MST)</td><td>+3</td></tr>
                         <tr><td>US Central (CST)</td><td>+4</td></tr>
                         <tr><td>US Eastern (EST)</td><td>+5</td></tr>
+                        <tr><td>Philippines (PHT)</td><td>+18</td></tr>
                         <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
                     </table>
                 </div>
@@ -100,6 +108,7 @@
                         <tr><td>US Mountain (MDT)</td><td>+4</td></tr>
                         <tr><td>US Central (CDT)</td><td>+5</td></tr>
                         <tr><td>US Eastern (EDT)</td><td>+6</td></tr>
+                        <tr><td>Philippines (PHT)</td><td>+18</td></tr>
                         <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
                     </table>
                 </div>
@@ -108,25 +117,25 @@
     </div>
 
     <script>
-        // All the existing script content remains the same, just add these new functions and modifications:
         function getTimeZones() {
             // Base timezone configuration
             const zones = [
                 { id: 'hawaii', name: 'HST', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', offset: 0 },
                 { id: 'alaska', name: 'AKST', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', offset: 1 },
                 { id: 'us-pacific', name: 'PST', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', offset: 2 },
-                { id: 'arizona', name: 'MST', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', offset: 2 }, // One hour behind Mountain during DST
+                { id: 'arizona', name: 'MST', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', offset: 2 },
                 { id: 'us-mountain', name: 'MST', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', offset: 3 },
                 { id: 'us-central', name: 'CST', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', offset: 4 },
                 { id: 'us-eastern', name: 'EST', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', offset: 5 },
+                { id: 'philippines', name: 'PHT', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', offset: 18 },
                 { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', offset: 23 }
             ];
             
             // Adjust offsets if DST is in effect
             if (isDST()) {
                 return zones.map(tz => {
-                    if (tz.id === 'arizona') {
-                        return { ...tz, offset: 2 }; // Keep Arizona at MST
+                    if (tz.id === 'arizona' || tz.id === 'philippines') {
+                        return tz; // Philippines and Arizona don't observe DST
                     } else if (['us-pacific', 'us-mountain', 'us-central', 'us-eastern'].includes(tz.id)) {
                         return { ...tz, offset: tz.offset + 1 }; // Add 1 hour for DST
                     }
@@ -136,23 +145,24 @@
             return zones;
         }
 
-        function isDST() {
-            const today = new Date();
-            const year = today.getFullYear();
-            
-            // DST starts second Sunday in March at 2:00 AM
-            const marchSecondSunday = new Date(year, 2, 1);
-            marchSecondSunday.setDate(1 + (14 - marchSecondSunday.getDay()) % 7);
-            const dstStart = new Date(year, 2, marchSecondSunday.getDate(), 2, 0, 0);
-            
-            // DST ends first Sunday in November at 2:00 AM
-            const novFirstSunday = new Date(year, 10, 1);
-            novFirstSunday.setDate(1 + (7 - novFirstSunday.getDay()) % 7);
-            const dstEnd = new Date(year, 10, novFirstSunday.getDate(), 2, 0, 0);
-            
-            // Check if current date is within DST period
-            return today >= dstStart && today < dstEnd;
-        }
+         
+        function isDST() { 
+            const today = new Date(); 
+            const year = today.getFullYear(); 
+             
+            // DST starts second Sunday in March at 2:00 AM 
+            const marchSecondSunday = new Date(year, 2, 1); 
+            marchSecondSunday.setDate(1 + (14 - marchSecondSunday.getDay()) % 7); 
+            const dstStart = new Date(year, 2, marchSecondSunday.getDate(), 2, 0, 0); 
+             
+            // DST ends first Sunday in November at 2:00 AM 
+            const novFirstSunday = new Date(year, 10, 1); 
+            novFirstSunday.setDate(1 + (7 - novFirstSunday.getDay()) % 7); 
+            const dstEnd = new Date(year, 10, novFirstSunday.getDate(), 2, 0, 0); 
+             
+            // Check if current date is within DST period 
+            return today >= dstStart && today < dstEnd; 
+        } 
 
         function toggleArizonaClock() {
             const arizonaClock = document.getElementById('arizona-clock');
