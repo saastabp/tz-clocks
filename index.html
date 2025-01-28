@@ -145,21 +145,20 @@
             return zones;
         }
 
-         
         function isDST() { 
             const today = new Date(); 
             const year = today.getFullYear(); 
-             
+
             // DST starts second Sunday in March at 2:00 AM 
             const marchSecondSunday = new Date(year, 2, 1); 
             marchSecondSunday.setDate(1 + (14 - marchSecondSunday.getDay()) % 7); 
             const dstStart = new Date(year, 2, marchSecondSunday.getDate(), 2, 0, 0); 
-             
+
             // DST ends first Sunday in November at 2:00 AM 
             const novFirstSunday = new Date(year, 10, 1); 
             novFirstSunday.setDate(1 + (7 - novFirstSunday.getDay()) % 7); 
             const dstEnd = new Date(year, 10, novFirstSunday.getDate(), 2, 0, 0); 
-             
+
             // Check if current date is within DST period 
             return today >= dstStart && today < dstEnd; 
         } 
