@@ -61,6 +61,13 @@
                     </div>
                 </div>
                 <div class="clock-column">
+                    <div class="clock-header">United Kingdom (GMT)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="united-kingdom-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="united-kingdom-minute" min="0" max="59" step="15">
+                    </div>
+                </div>                
+                <div class="clock-column">
                     <div class="clock-header">Philippines (PHT)</div>
                     <div class="time-inputs">
                         <input type="number" id="philippines-hour" min="0" max="23" step="1"> :
@@ -93,6 +100,7 @@
                         <tr><td>US Mountain (MST)</td><td>+3</td></tr>
                         <tr><td>US Central (CST)</td><td>+4</td></tr>
                         <tr><td>US Eastern (EST)</td><td>+5</td></tr>
+                        <tr><td>United Kingdom (GMT)</td><td>+10</td></tr>
                         <tr><td>Philippines (PHT)</td><td>+18</td></tr>
                         <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
                     </table>
@@ -108,8 +116,10 @@
                         <tr><td>US Mountain (MDT)</td><td>+4</td></tr>
                         <tr><td>US Central (CDT)</td><td>+5</td></tr>
                         <tr><td>US Eastern (EDT)</td><td>+6</td></tr>
+                        <tr><td>United Kingdom (GMT)</td><td>+10</td></tr>
                         <tr><td>Philippines (PHT)</td><td>+18</td></tr>
                         <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
+
                     </table>
                 </div>
             </div>
@@ -117,252 +127,379 @@
     </div>
 
     <script>
-        function getTimeZones() {
-            // Base timezone configuration
-            const zones = [
-                { id: 'hawaii', name: 'HST', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', offset: 0 },
-                { id: 'alaska', name: 'AKST', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', offset: 1 },
-                { id: 'us-pacific', name: 'PST', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', offset: 2 },
-                { id: 'arizona', name: 'MST', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', offset: 2 },
-                { id: 'us-mountain', name: 'MST', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', offset: 3 },
-                { id: 'us-central', name: 'CST', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', offset: 4 },
-                { id: 'us-eastern', name: 'EST', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', offset: 5 },
-                { id: 'philippines', name: 'PHT', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', offset: 18 },
-                { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', offset: 23 }
-            ];
-            
-            // Adjust offsets if DST is in effect
-            if (isDST()) {
-                return zones.map(tz => {
-                    if (tz.id === 'arizona' || tz.id === 'philippines') {
-                        return tz; // Philippines and Arizona don't observe DST
-                    } else if (['us-pacific', 'us-mountain', 'us-central', 'us-eastern'].includes(tz.id)) {
-                        return { ...tz, offset: tz.offset + 1 }; // Add 1 hour for DST
-                    }
-                    return tz;
-                });
-            }
-            return zones;
-        }
 
-        function isDST() { 
-            const today = new Date(); 
-            const year = today.getFullYear(); 
-
-            // DST starts second Sunday in March at 2:00 AM 
-            const marchSecondSunday = new Date(year, 2, 1); 
-            marchSecondSunday.setDate(1 + (14 - marchSecondSunday.getDay()) % 7); 
-            const dstStart = new Date(year, 2, marchSecondSunday.getDate(), 2, 0, 0); 
-
-            // DST ends first Sunday in November at 2:00 AM 
-            const novFirstSunday = new Date(year, 10, 1); 
-            novFirstSunday.setDate(1 + (7 - novFirstSunday.getDay()) % 7); 
-            const dstEnd = new Date(year, 10, novFirstSunday.getDate(), 2, 0, 0); 
-
-            // Check if current date is within DST period 
-            return today >= dstStart && today < dstEnd; 
-        } 
-
-        function toggleArizonaClock() {
-            const arizonaClock = document.getElementById('arizona-clock');
-            const standardTable = document.getElementById('standard-table');
-            const dstTable = document.getElementById('dst-table');
-            
-            if (isDST()) {
-                arizonaClock.style.display = '';
-                standardTable.style.display = 'none';
-                dstTable.style.display = 'block';
-            } else {
-                arizonaClock.style.display = 'none';
-                standardTable.style.display = 'block';
-                dstTable.style.display = 'none';
-            }
-        }
-
-        // Initialize timeZones with the correct configuration
-        const timeZones = getTimeZones();
-
-        // Modify the updateClocks function
-        const originalUpdateClocks = updateClocks;
-        updateClocks = function() {
-            const currentTimeZones = getTimeZones();
-            timeZones.length = 0;
-            timeZones.push(...currentTimeZones);
-            originalUpdateClocks();
-            toggleArizonaClock();
-        };
-
-        // Initial call to toggleArizonaClock
-        toggleArizonaClock();
-        let clockInterval;
-
-        function normalizeTime(hours, minutes, roundToFifteen = false) {
-            let totalMinutes = hours * 60 + minutes;
-            
-            // Only round to 15 minutes when manually adjusting
-            if (roundToFifteen) {
-                minutes = Math.round(minutes / 15) * 15;
-                totalMinutes = hours * 60 + minutes;
-            }
-            
-            while (totalMinutes < 0) totalMinutes += 24 * 60;
-            totalMinutes = totalMinutes % (24 * 60);
-            return {
-                hours: Math.floor(totalMinutes / 60),
-                minutes: totalMinutes % 60
-            };
-        }
-
-        let use24Hour = true;
-
-        function formatHour(hour, minutes) {
-            if (use24Hour) {
-                return hour;
-            } else {
-                const period = hour >= 12 ? 'PM' : 'AM';
-                hour = hour % 12;
-                return hour === 0 ? 12 : hour;
-            }
-        }
-
-        function updateTimeDisplay(hourInput, minuteInput, hours, minutes) {
-            const formattedHour = formatHour(hours, minutes);
-            hourInput.value = formattedHour;
-            minuteInput.value = String(minutes).padStart(2, '0');
-            
-            // Update AM/PM indicator if in 12-hour mode
-            const amPmSpan = hourInput.parentElement.querySelector('.ampm');
-            if (!use24Hour) {
-                if (!amPmSpan) {
-                    const span = document.createElement('span');
-                    span.className = 'ampm';
-                    span.textContent = hours >= 12 ? ' PM' : ' AM';
-                    hourInput.parentElement.appendChild(span);
-                } else {
-                    amPmSpan.textContent = hours >= 12 ? ' PM' : ' AM';
-                }
-            } else if (amPmSpan) {
-                amPmSpan.remove();
-            }
-        }
-
-        function updateClocks() {
-            const now = new Date();
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const hstTime = new Date(utc + (3600000 * -10));
-
-            const baseHours = hstTime.getHours();
-            const baseMinutes = hstTime.getMinutes();
-
-            timeZones.forEach(tz => {
-                const time = normalizeTime(baseHours, baseMinutes + (tz.offset * 60));
-                const hourInput = document.getElementById(tz.hourInput);
-                const minuteInput = document.getElementById(tz.minuteInput);
-                updateTimeDisplay(hourInput, minuteInput, time.hours, time.minutes);
-            });
-        }
-
-        function syncClocks(baseHours, baseMinutes) {
-            timeZones.forEach(tz => {
-                const time = normalizeTime(baseHours, baseMinutes + (tz.offset * 60), true);
-                const hourInput = document.getElementById(tz.hourInput);
-                const minuteInput = document.getElementById(tz.minuteInput);
-                updateTimeDisplay(hourInput, minuteInput, time.hours, time.minutes);
-            });
-        }
-
-        function startClocks() {
-            stopClocks();
-            updateClocks();
-            clockInterval = setInterval(updateClocks, 1000);
-        }
-
-        function stopClocks() {
-            if (clockInterval) {
-                clearInterval(clockInterval);
-                clockInterval = null;
-            }
-        }
-
-        function adjustTime(minutes) {
-            stopClocks();
-            const hawaiiHours = parseInt(document.getElementById('hawaii-hour').value) || 0;
-            const hawaiiMinutes = parseInt(document.getElementById('hawaii-minute').value) || 0;
-            const time = normalizeTime(hawaiiHours, hawaiiMinutes + minutes);
-            syncClocks(time.hours, time.minutes);
-        }
-
-        // Event Listeners
-        document.querySelectorAll('.time-inputs input').forEach(input => {
-            input.addEventListener('input', (e) => {
-                stopClocks();
-                
-                // Get the input ID and identify which clock was changed
-                const inputId = e.target.id;
-                const currentTz = timeZones.find(tz => 
-                    tz.hourInput === inputId || tz.minuteInput === inputId
-                );
-                
-                if (currentTz) {
-                    // Get the current input values for the changed timezone
-                    let hours = parseInt(document.getElementById(currentTz.hourInput).value) || 0;
-                    const minutes = parseInt(document.getElementById(currentTz.minuteInput).value) || 0;
-                    
-                    // Convert 12-hour format input to 24-hour if needed
-                    if (!use24Hour && input.id.endsWith('-hour')) {
-                        const amPmSpan = input.parentElement.querySelector('.ampm');
-                        const isPM = amPmSpan && amPmSpan.textContent.trim() === 'PM';
-                        if (hours === 12) {
-                            hours = isPM ? 12 : 0;
-                        } else if (isPM) {
-                            hours += 12;
-                        }
-                    }
-                    
-                    // Calculate back to Hawaii time
-                    const totalMinutes = hours * 60 + minutes - (currentTz.offset * 60);
-                    const hawaiiTime = normalizeTime(Math.floor(totalMinutes / 60), totalMinutes % 60, true);
-                    
-                    // Sync all clocks based on the new Hawaii time
-                    syncClocks(hawaiiTime.hours, hawaiiTime.minutes);
-                }
-            });
-        });
-
-        document.getElementById('reset-button').addEventListener('click', startClocks);
-        document.getElementById('increment-button').addEventListener('click', () => adjustTime(15));
-        document.getElementById('decrement-button').addEventListener('click', () => adjustTime(-15));
+// Clock class
+class TimeZoneClock {
+    constructor(id, name, hourInputId, minuteInputId, tz) {
+        this.id = id;
+        this.name = name;
+        this.hourInput = document.getElementById(hourInputId);
+        this.minuteInput = document.getElementById(minuteInputId);
+        this.tz = tz; // Timezone string (e.g., 'US/Pacific')
+        this.date = new Date(); // Store time in UTC
         
-        document.getElementById('format-toggle').addEventListener('click', () => {
-            use24Hour = !use24Hour;
-            if (!clockInterval) {
-                // If clocks are stopped, update display without changing times
-                timeZones.forEach(tz => {
-                    const hourInput = document.getElementById(tz.hourInput);
-                    const minuteInput = document.getElementById(tz.minuteInput);
-                    const hours = parseInt(hourInput.value);
-                    const minutes = parseInt(minuteInput.value);
-                    // Convert from 12-hour to 24-hour if necessary
-                    let actualHours = hours;
-                    if (!use24Hour) {
-                        const amPmSpan = hourInput.parentElement.querySelector('.ampm');
-                        const isPM = amPmSpan && amPmSpan.textContent.trim() === 'PM';
-                        if (hours === 12) {
-                            actualHours = isPM ? 12 : 0;
-                        } else if (isPM) {
-                            actualHours += 12;
-                        }
-                    }
-                    updateTimeDisplay(hourInput, minuteInput, actualHours, minutes);
-                });
-            } else {
-                // If clocks are running, they'll update automatically
-                updateClocks();
+        // Bind event listeners for all input types
+        this.hourInput.addEventListener('change', () => this.handleInputChange());
+        this.minuteInput.addEventListener('change', () => this.handleInputChange());
+        this.hourInput.addEventListener('input', () => this.handleInputChange());
+        this.minuteInput.addEventListener('input', () => this.handleInputChange());
+    }
+    
+    // Set to current time
+    setCurrentTime() {
+        this.date = new Date();
+        this.updateDisplay();
+    }
+    
+    // Adjust time by adding minutes (positive or negative)
+    adjustTime(minutesToAdd) {
+        // Create a new date by adding minutes to the current time
+        this.date = new Date(this.date.getTime() + (minutesToAdd * 60000));
+        this.updateDisplay();
+    }
+    
+    // Get timezone offset in minutes for the current date
+    getTimezoneOffset() {
+        const utcDate = new Date(this.date.toLocaleString('en-US', { timeZone: 'UTC' }));
+        const tzDate = new Date(this.date.toLocaleString('en-US', { timeZone: this.tz }));
+        return (utcDate.getTime() - tzDate.getTime()) / (60 * 1000);
+    }
+    
+    // Get the AM/PM indicator
+    getAmPmIndicator() {
+        // Get the date in the correct timezone
+        const dateOptions = { timeZone: this.tz };
+        
+        // Create a date formatter that includes all time components
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: this.tz,
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: false
+        });
+        
+        // Get the date parts in the specified timezone
+        const dateParts = formatter.formatToParts(this.date);
+        const timezoneDateObj = {};
+        
+        // Extract the parts into an object for easier access
+        dateParts.forEach(part => {
+            if (part.type !== 'literal') {
+                timezoneDateObj[part.type] = parseInt(part.value, 10);
             }
         });
+        
+        // Get the hour in the specified timezone
+        const hour = timezoneDateObj.hour;
+        
+        // If the hour is less than 12, return 'AM', otherwise return 'PM'
+        return hour < 12 ? ' AM' : ' PM';
+    }
+    
+    // Get localized time for display based on timezone
+    getLocalizedTime() {
+        // Format the date in the specified timezone
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: this.tz,
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false
+        });
+        
+        // Get the date parts in the specified timezone
+        const dateParts = formatter.formatToParts(this.date);
+        const localTime = {};
+        
+        // Extract the parts into an object for easier access
+        dateParts.forEach(part => {
+            if (part.type !== 'literal') {
+                localTime[part.type] = parseInt(part.value, 10);
+            }
+        });
+        
+        return {
+            hours24: localTime.hour,
+            minutes: localTime.minute
+        };
+    }
+    
+    // Update the display based on the current time adjusted for timezone
+    updateDisplay() {
+        // Get the localized time for this timezone
+        const localTime = this.getLocalizedTime();
+        const hours24 = localTime.hours24;
+        const minutes = localTime.minutes;
+        
+        if (use24Hour) {
+            // 24-hour format
+            this.hourInput.value = hours24;
+            // Remove any AM/PM indicator if present
+            const amPmSpan = this.hourInput.parentElement.querySelector('.ampm');
+            if (amPmSpan) amPmSpan.remove();
+        } else {
+            // 12-hour format
+            const hour12 = hours24 % 12 || 12; // Convert 0 to 12 for midnight
+            
+            this.hourInput.value = hour12;
+            
+            // Update or add AM/PM indicator
+            let amPmSpan = this.hourInput.parentElement.querySelector('.ampm');
+            if (!amPmSpan) {
+                amPmSpan = document.createElement('span');
+                amPmSpan.className = 'ampm';
+                this.hourInput.parentElement.appendChild(amPmSpan);
+            }
+            
+            amPmSpan.textContent = this.getAmPmIndicator();
+        }
+        
+        // Always format minutes with leading zero
+        this.minuteInput.value = String(minutes).padStart(2, '0');
+    }
+    
+    // Get the input time and convert it to a Date object
+    getInputAsDate() {
+        // Get input values
+        let inputHours = parseInt(this.hourInput.value) || 0;
+        let inputMinutes = parseInt(this.minuteInput.value) || 0;
+        
+        // Round minutes to nearest 15
+        inputMinutes = Math.round(inputMinutes / 15) * 15;
+        
+        // Convert to 24-hour format if in 12-hour mode
+        if (!use24Hour) {
+            const amPmSpan = this.hourInput.parentElement.querySelector('.ampm');
+            const isPM = amPmSpan && amPmSpan.textContent.trim() === 'PM';
+            
+            if (inputHours === 12) {
+                inputHours = isPM ? 12 : 0;
+            } else if (isPM) {
+                inputHours += 12;
+            }
+        }
+        
+        // Get the current date in the target timezone
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: this.tz,
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        });
+        
+        const parts = formatter.formatToParts(this.date);
+        const dateParts = {};
+        
+        parts.forEach(part => {
+            if (part.type !== 'literal') {
+                dateParts[part.type] = part.value;
+            }
+        });
+        
+        // Create a date string in ISO format with the input time
+        const dateString = `${dateParts.year}-${dateParts.month.padStart(2, '0')}-${dateParts.day.padStart(2, '0')}T${String(inputHours).padStart(2, '0')}:${String(inputMinutes).padStart(2, '0')}:00`;
+        
+        // Create a date object adjusted for the timezone offset
+        const tzOffset = this.getTimezoneOffset();
+        const inputDate = new Date(dateString);
+        const utcTime = inputDate.getTime() - (tzOffset * 60000);
+        
+        return new Date(utcTime);
+    }
+    
+    // Calculate time difference based on input changes
+    calculateTimeDifference() {
+        const inputDate = this.getInputAsDate();
+        
+        // Calculate difference in minutes
+        let diffMilliseconds = inputDate.getTime() - this.date.getTime();
+        let diffMinutes = diffMilliseconds / 60000;
+        
+        // Handle wraparound (assume changes greater than 12 hours are going the other direction)
+        if (diffMinutes > 12 * 60) {
+            diffMinutes = diffMinutes - 24 * 60;
+        } else if (diffMinutes < -12 * 60) {
+            diffMinutes = diffMinutes + 24 * 60;
+        }
+        
+        return diffMinutes;
+    }
+    
+    // Handle all input changes
+    handleInputChange() {
+        ClockApp.stopAutoUpdate();
+        
+        // Calculate the change in minutes
+        const minutesChange = this.calculateTimeDifference();
+        
+        // Only adjust if there's an actual change
+        if (minutesChange !== 0) {
+            ClockApp.adjustAllClocks(minutesChange);
+        }
+    }
+}
+// Global app controller
+const ClockApp = {
+    clocks: {},
+    updateInterval: null,
+    
+    init: function() {
+        this.createClocks();
+        this.setupButtons();
+        this.toggleArizonaClock();
+        this.resetClocks();
+    },
+    
+    createClocks: function() {
+        const configs = this.getTimeZoneConfigs();
+        
+        configs.forEach(config => {
+            console.log("Adding clock: " + config.id)
+            this.clocks[config.id] = new TimeZoneClock(
+                config.id,
+                config.name,
+                config.hourInput,
+                config.minuteInput,
+                config.tz
+            );
+        });
+    },
+    
+    getTimeZoneConfigs: function() {
+        // Base configurations with GMT offsets
+        const zones = [
+            { id: 'hawaii', name: 'HST', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', tz: 'US/Hawaii' },
+            { id: 'alaska', name: 'AKST', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', tz: 'US/Alaska' },
+            { id: 'us-pacific', name: 'PST', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', tz: 'US/Pacific' },
+            { id: 'arizona', name: 'MST', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', tz: 'US/Arizona' },
+            { id: 'us-mountain', name: 'MST', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', tz: 'US/Mountain' },
+            { id: 'us-central', name: 'CST', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', tz: 'US/Central' },
+            { id: 'us-eastern', name: 'EST', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', tz: 'US/Eastern' },
+            { id: 'united-kingdom', name: 'GMT', hourInput: 'united-kingdom-hour', minuteInput: 'united-kingdom-minute', tz: 'Greenwich'},
+            { id: 'philippines', name: 'PHT', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', tz: 'Asia/Manila' },
+            { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'}
+        ];
+        
+        return zones;
+    },
+    
+    isDST: function() {
+        const today = new Date(); 
+        const year = today.getFullYear(); 
 
-        // Start the clocks initially
-        startClocks();    
-        </script>
+        // DST starts second Sunday in March at 2:00 AM 
+        const marchSecondSunday = new Date(year, 2, 1); 
+        marchSecondSunday.setDate(1 + (14 - marchSecondSunday.getDay()) % 7); 
+        const dstStart = new Date(year, 2, marchSecondSunday.getDate(), 2, 0, 0); 
+
+        // DST ends first Sunday in November at 2:00 AM 
+        const novFirstSunday = new Date(year, 10, 1); 
+        novFirstSunday.setDate(1 + (7 - novFirstSunday.getDay()) % 7); 
+        const dstEnd = new Date(year, 10, novFirstSunday.getDate(), 2, 0, 0); 
+
+        // Check if current date is within DST period 
+        return today >= dstStart && today < dstEnd;
+    },
+    
+    toggleArizonaClock: function() {
+        const arizonaClock = document.getElementById('arizona-clock');
+        const standardTable = document.getElementById('standard-table');
+        const dstTable = document.getElementById('dst-table');
+        
+        if (this.isDST()) {
+            arizonaClock.style.display = '';
+            standardTable.style.display = 'none';
+            dstTable.style.display = 'block';
+        } else {
+            arizonaClock.style.display = 'none';
+            standardTable.style.display = 'block';
+            dstTable.style.display = 'none';
+        }
+    },
+    
+    setupButtons: function() {
+        // Store a reference to 'this' that will be accessible in the event handlers
+        const self = this;
+        
+        document.getElementById('reset-button').addEventListener('click', function() {
+            self.resetClocks();
+        });
+        
+        document.getElementById('increment-button').addEventListener('click', function() {
+            self.adjustAllClocks(15);
+        });
+        
+        document.getElementById('decrement-button').addEventListener('click', function() {
+            self.adjustAllClocks(-15);
+        });
+        
+        document.getElementById('format-toggle').addEventListener('click', function() {
+            self.toggleFormat();
+        });
+    },
+    
+    resetClocks: function() {
+        this.stopAutoUpdate();
+        
+        // Set each clock to current time
+        Object.values(this.clocks).forEach(clock => {
+            clock.setCurrentTime();
+        });
+        
+        // Start automatic updates
+        this.startAutoUpdate();
+    },
+    
+    adjustAllClocks: function(minutes) {
+        console.log("Adjusting all clocks by " + minutes + " minutes.");
+        // Important: Stop auto updates first
+        this.stopAutoUpdate();
+        
+        // Apply adjustment to each clock
+        Object.values(this.clocks).forEach(clock => {
+            clock.adjustTime(minutes);
+        });
+        
+        // Do NOT restart auto updates after adjustment
+    },
+    
+    startAutoUpdate: function() {
+        this.stopAutoUpdate();
+        this.updateInterval = setInterval(() => {
+            Object.values(this.clocks).forEach(clock => {
+                clock.setCurrentTime();
+            });
+        }, 1000);
+    },
+    
+    stopAutoUpdate: function() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+    },
+    
+    toggleFormat: function() {
+        use24Hour = !use24Hour;
+        Object.values(this.clocks).forEach(clock => {
+            clock.updateDisplay();
+        });
+    }
+};
+
+// Global setting for 12/24 hour format
+let use24Hour = true;
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    ClockApp.init();
+});
+
+    </script>
     </body>
 </html>

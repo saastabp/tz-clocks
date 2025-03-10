@@ -29,7 +29,7 @@ body {
 
 .clock-table {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 20px auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
