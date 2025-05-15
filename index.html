@@ -81,6 +81,13 @@
                         <input type="number" id="new-zealand-minute" min="0" max="59" step="15">
                     </div>
                 </div>
+                <div class="clock-column">
+                    <div class="clock-header">South Africa (SAST)</div>
+                    <div class="time-inputs">
+                        <input type="number" id="south-africa-hour" min="0" max="23" step="1"> :
+                        <input type="number" id="south-africa-minute" min="0" max="59" step="15">
+                    </div>
+                </div>
             </div>
 
             <div class="button-container">
@@ -105,6 +112,7 @@
                         <tr><td>United Kingdom (GMT)</td><td>+10</td></tr>
                         <tr><td>Philippines (PHT)</td><td>+18</td></tr>
                         <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
+                        <tr><td>South Africa (SAST)</td><td>+12</td></tr>
                     </table>
                 </div>
             
@@ -121,7 +129,7 @@
                         <tr><td>United Kingdom (GMT)</td><td>+10</td></tr>
                         <tr><td>Philippines (PHT)</td><td>+18</td></tr>
                         <tr><td>New Zealand (NZDT)</td><td>+23</td></tr>
-
+                        <tr><td>South Africa (SAST)</td><td>+12</td></tr>
                     </table>
                 </div>
             </div>
@@ -318,7 +326,8 @@
                 { id: 'us-eastern', name: 'EST', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', tz: 'US/Eastern' },
                 { id: 'united-kingdom', name: 'GMT', hourInput: 'united-kingdom-hour', minuteInput: 'united-kingdom-minute', tz: 'Greenwich'},
                 { id: 'philippines', name: 'PHT', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', tz: 'Asia/Manila' },
-                { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'}
+                { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'},
+                { id: 'south-africa', name: 'SAST', hourInput: 'south-africa-hour', minuteInput: 'south-africa-minute', tz: 'Africa/Johannesburg'}
             ];
             
             return zones;
