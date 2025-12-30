@@ -213,8 +213,7 @@ deploy_to_s3() {
         --exclude ".env" \
         --exclude "venv/*" \
         --exclude "*.iml" \
-        --delete \
-        --acl public-read
+        --delete
 
     print_success "Files synced to S3"
 
@@ -224,16 +223,14 @@ deploy_to_s3() {
     # HTML files
     aws s3 cp "$S3_BUCKET/index.html" "$S3_BUCKET/index.html" \
         --content-type "text/html" \
-        --metadata-directive REPLACE \
-        --acl public-read 2>/dev/null || true
+        --metadata-directive REPLACE 2>/dev/null || true
 
     # CSS files
     for file in $(aws s3 ls "$S3_BUCKET/css/" --recursive | awk '{print $4}'); do
         if [[ $file == *.css ]]; then
             aws s3 cp "$S3_BUCKET/$file" "$S3_BUCKET/$file" \
                 --content-type "text/css" \
-                --metadata-directive REPLACE \
-                --acl public-read 2>/dev/null || true
+                --metadata-directive REPLACE 2>/dev/null || true
         fi
     done
 
@@ -242,8 +239,7 @@ deploy_to_s3() {
         if [[ $file == *.js ]]; then
             aws s3 cp "$S3_BUCKET/$file" "$S3_BUCKET/$file" \
                 --content-type "application/javascript" \
-                --metadata-directive REPLACE \
-                --acl public-read 2>/dev/null || true
+                --metadata-directive REPLACE 2>/dev/null || true
         fi
     done
 
