@@ -1,20 +1,35 @@
 // Clock class
 class TimeZoneClock {
-    constructor(id, name, hourInputId, minuteInputId, tz) {
+    constructor(id, name, hourInputId, minuteInputId, tz, app) {
         this.id = id;
         this.name = name;
         this.hourInput = document.getElementById(hourInputId);
         this.minuteInput = document.getElementById(minuteInputId);
         this.tz = tz; // Timezone string (e.g., 'US/Pacific')
         this.date = new Date(); // Store time in UTC
-
-        // Make the inputs read-only to prevent direct editing
-        this.hourInput.readOnly = true;
-        this.minuteInput.readOnly = true;
+        this.app = app; // Reference to ClockApp for synchronization
 
         // Remove the up/down arrows from number inputs
         this.hourInput.classList.add('no-spinner');
         this.minuteInput.classList.add('no-spinner');
+
+        // Add event listeners for manual time entry
+        this.hourInput.addEventListener('input', () => this.handleManualInput());
+        this.minuteInput.addEventListener('input', () => this.handleManualInput());
+        this.hourInput.addEventListener('blur', () => this.validateAndSync());
+        this.minuteInput.addEventListener('blur', () => this.validateAndSync());
+
+        // Add Enter key support to blur the input
+        this.hourInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.hourInput.blur();
+            }
+        });
+        this.minuteInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.minuteInput.blur();
+            }
+        });
     }
 
     // Set to current time
@@ -129,6 +144,81 @@ class TimeZoneClock {
         // Always format minutes with leading zero
         this.minuteInput.value = String(minutes).padStart(2, '0');
     }
+
+    // Handle manual input - stop auto-update when user starts typing
+    handleManualInput() {
+        this.app.stopAutoUpdate();
+    }
+
+    // Validate and synchronize all clocks when user finishes editing
+    validateAndSync() {
+        const hourValue = parseInt(this.hourInput.value, 10);
+        const minuteValue = parseInt(this.minuteInput.value, 10);
+
+        // Validate input
+        if (isNaN(hourValue) || isNaN(minuteValue)) {
+            // If invalid, restore current time
+            this.updateDisplay();
+            return;
+        }
+
+        // Validate ranges based on format
+        if (use24Hour) {
+            if (hourValue < 0 || hourValue > 23 || minuteValue < 0 || minuteValue > 59) {
+                this.updateDisplay();
+                return;
+            }
+        } else {
+            if (hourValue < 1 || hourValue > 12 || minuteValue < 0 || minuteValue > 59) {
+                this.updateDisplay();
+                return;
+            }
+        }
+
+        // Set the time from the input values
+        this.setTimeFromInput(hourValue, minuteValue);
+
+        // Synchronize all other clocks
+        this.app.syncFromClock(this);
+    }
+
+    // Set this clock's time from input values
+    setTimeFromInput(hourInput, minuteInput) {
+        // Get the current local time in this timezone
+        const currentLocalTime = this.getLocalizedTime();
+        const currentHours24 = currentLocalTime.hours24;
+        const currentMinutes = currentLocalTime.minutes;
+
+        // Convert input to 24-hour format
+        let newHours24 = hourInput;
+        if (!use24Hour) {
+            const currentIsAM = currentHours24 < 12;
+            const isPM = !currentIsAM;
+
+            // Convert to 24-hour format keeping the current AM/PM period
+            if (hourInput === 12) {
+                newHours24 = isPM ? 12 : 0;
+            } else {
+                newHours24 = isPM ? hourInput + 12 : hourInput;
+            }
+        }
+
+        // Calculate the time difference in minutes
+        const currentTotalMinutes = currentHours24 * 60 + currentMinutes;
+        const newTotalMinutes = newHours24 * 60 + minuteInput;
+        let minutesDiff = newTotalMinutes - currentTotalMinutes;
+
+        // Handle day boundary: if difference is more than 12 hours in either direction,
+        // assume we crossed midnight
+        if (minutesDiff > 12 * 60) {
+            minutesDiff -= 24 * 60;  // Went back a day
+        } else if (minutesDiff < -12 * 60) {
+            minutesDiff += 24 * 60;  // Went forward a day
+        }
+
+        // Adjust the time by the calculated difference
+        this.adjustTime(minutesDiff);
+    }
 }
 
 // Global app controller
@@ -171,7 +261,8 @@ const ClockApp = {
                 config.name,
                 config.hourInput,
                 config.minuteInput,
-                config.tz
+                config.tz,
+                this  // Pass reference to ClockApp
             );
         });
     },
@@ -320,6 +411,10 @@ const ClockApp = {
             self.adjustAllClocks(-60);
         });
 
+        document.getElementById('toggle-ampm').addEventListener('click', function() {
+            self.toggleAMPM();
+        });
+
         document.getElementById('increment-button-min').addEventListener('click', function() {
             self.adjustAllClocks(15); // The adjustAllClocks method now handles snapping to intervals
         });
@@ -441,6 +536,37 @@ const ClockApp = {
         use24Hour = !use24Hour;
         Object.values(this.clocks).forEach(clock => {
             clock.updateDisplay();
+        });
+    },
+
+    toggleAMPM: function() {
+        // Stop auto updates
+        this.stopAutoUpdate();
+
+        // Get a reference clock to check current AM/PM
+        const referenceClock = Object.values(this.clocks)[0];
+        const localTime = referenceClock.getLocalizedTime();
+        const currentHour = localTime.hours24;
+
+        // Toggle between AM and PM (add or subtract 12 hours = 720 minutes)
+        const minutesToAdjust = currentHour < 12 ? 720 : -720;
+
+        // Apply the adjustment to all clocks
+        Object.values(this.clocks).forEach(clock => {
+            clock.adjustTime(minutesToAdjust);
+        });
+    },
+
+    // Synchronize all clocks from a source clock
+    syncFromClock: function(sourceClock) {
+        const sourceTime = sourceClock.date.getTime();
+
+        // Update all other clocks to the same UTC time
+        Object.values(this.clocks).forEach(clock => {
+            if (clock !== sourceClock) {
+                clock.date = new Date(sourceTime);
+                clock.updateDisplay();
+            }
         });
     }
 };
