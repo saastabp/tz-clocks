@@ -72,11 +72,15 @@ The script will:
 3. **Check current branch** (warns if not on `main`)
 4. Check for uncommitted changes
 5. Prompt for a version number (e.g., 1.2.0)
-6. Create a git tag with optional message
-7. Push tag to remote (with confirmation)
-8. Sync files to S3 bucket (with confirmation)
-9. Set proper content types for HTML, CSS, and JS files
-10. Verify deployment
+6. **Automatically update version in index.html**
+7. **Automatically update CHANGELOG.md with release date**
+8. Commit version changes to git
+9. Create a git tag with optional message
+10. Push tag to remote (with confirmation)
+11. Sync files to S3 bucket (with confirmation)
+12. Set proper content types for HTML, CSS, and JS files
+13. Verify deployment
+14. **Automatically look up and invalidate CloudFront distribution** (with confirmation)
 
 **Branch Protection**: The script will warn you if you're not on the `main` branch and provide the recommended workflow. You can override this, but tags should only be created on `main` after merging tested changes.
 
@@ -277,17 +281,19 @@ The S3 bucket should be configured with:
    ]
    ```
 
-## CloudFront Integration (Optional)
+## CloudFront Integration
 
-If using CloudFront for CDN:
+The deployment script automatically detects and invalidates CloudFront distributions:
 
-1. Create a CloudFront distribution pointing to the S3 bucket
-2. Add invalidation to deployment script:
-   ```bash
-   aws cloudfront create-invalidation \
-     --distribution-id YOUR_DISTRIBUTION_ID \
-     --paths "/*"
-   ```
+1. The script searches for CloudFront distributions with the S3 bucket as origin
+2. If found, it prompts to invalidate the cache after deployment
+3. Invalidation typically takes 5-15 minutes to complete
+4. The script will display the invalidation ID for tracking
+
+**Note**: CloudFront invalidation is automatic - no manual configuration needed. The script uses:
+```bash
+aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?DomainName=='bucket-name.s3.amazonaws.com']].Id"
+```
 
 ## Security Considerations
 

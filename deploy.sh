@@ -39,6 +39,94 @@ print_info() {
     echo -e "${BLUE}ℹ $1${NC}"
 }
 
+# Update version in HTML file
+update_html_version() {
+    print_info "Updating version in index.html to $VERSION"
+
+    # Use sed to replace the version in the HTML file
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/$VERSION/g" index.html
+    else
+        # Linux
+        sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/$VERSION/g" index.html
+    fi
+
+    print_success "Version updated in index.html"
+}
+
+# Update CHANGELOG with release date and version
+update_changelog() {
+    local release_date=$(date +%Y-%m-%d)
+    local version_without_v="${VERSION#v}"  # Remove 'v' prefix for CHANGELOG
+
+    print_info "Updating CHANGELOG.md with version $version_without_v and date: $release_date"
+
+    # Replace [Unreleased] - RELEASE_DATE with [$VERSION] - $release_date
+    # and add a new [Unreleased] section at the top
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "s/## \[Unreleased\] - RELEASE_DATE/## [Unreleased]\n\n## [$version_without_v] - $release_date/g" CHANGELOG.md
+    else
+        # Linux
+        sed -i "s/## \[Unreleased\] - RELEASE_DATE/## [Unreleased]\n\n## [$version_without_v] - $release_date/g" CHANGELOG.md
+    fi
+
+    print_success "CHANGELOG.md updated with version $version_without_v"
+}
+
+# Get CloudFront distribution ID for the S3 bucket
+get_cloudfront_distribution() {
+    print_info "Looking up CloudFront distribution for bucket..."
+
+    # Extract bucket name from S3_BUCKET
+    local bucket_name=$(echo "$S3_BUCKET" | sed 's|s3://||')
+
+    # Query CloudFront distributions and find the one with our S3 bucket as origin
+    CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?DomainName=='${bucket_name}.s3.amazonaws.com']].Id | [0]" --output text 2>/dev/null)
+
+    if [[ -z "$CLOUDFRONT_ID" || "$CLOUDFRONT_ID" == "None" ]]; then
+        print_warning "No CloudFront distribution found for bucket: $bucket_name"
+        return 1
+    fi
+
+    print_success "Found CloudFront distribution: $CLOUDFRONT_ID"
+    return 0
+}
+
+# Invalidate CloudFront cache
+invalidate_cloudfront() {
+    if ! get_cloudfront_distribution; then
+        print_warning "Skipping CloudFront invalidation"
+        return
+    fi
+
+    print_info "Creating CloudFront invalidation for distribution: $CLOUDFRONT_ID"
+
+    read -p "Invalidate CloudFront cache? (Y/n) " -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        print_warning "CloudFront invalidation skipped"
+        return
+    fi
+
+    # Create invalidation for all paths
+    local invalidation_output=$(aws cloudfront create-invalidation \
+        --distribution-id "$CLOUDFRONT_ID" \
+        --paths "/*" \
+        --output json 2>&1)
+
+    if [[ $? -eq 0 ]]; then
+        local invalidation_id=$(echo "$invalidation_output" | grep -o '"Id": "[^"]*"' | head -1 | sed 's/"Id": "\(.*\)"/\1/')
+        print_success "CloudFront invalidation created: $invalidation_id"
+        print_info "Invalidation may take several minutes to complete"
+    else
+        print_error "Failed to create CloudFront invalidation"
+        print_info "Error: $invalidation_output"
+    fi
+}
+
 # Check if AWS CLI is installed
 check_aws_cli() {
     if ! command -v aws &> /dev/null; then
@@ -126,11 +214,34 @@ get_version() {
     git tag -l | tail -5 || echo "  No tags found"
     echo ""
 
-    read -p "Enter version number (e.g., 1.2.0): " VERSION
+    # Get the latest tag and suggest next version
+    latest_tag=$(git tag -l | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
 
-    if [[ -z "$VERSION" ]]; then
-        print_error "Version number is required"
-        exit 1
+    if [[ -n "$latest_tag" ]]; then
+        # Extract version numbers (remove 'v' prefix)
+        version_no_v="${latest_tag#v}"
+
+        # Split into major.minor.patch
+        IFS='.' read -r major minor patch <<< "$version_no_v"
+
+        # Increment patch version for suggestion
+        suggested_patch=$((patch + 1))
+        suggested_version="v${major}.${minor}.${suggested_patch}"
+
+        print_info "Latest tag: $latest_tag"
+        read -p "Enter version number [$suggested_version]: " VERSION
+
+        # Use suggested version if user just pressed Enter
+        if [[ -z "$VERSION" ]]; then
+            VERSION="$suggested_version"
+        fi
+    else
+        read -p "Enter version number (e.g., 1.0.0): " VERSION
+
+        if [[ -z "$VERSION" ]]; then
+            print_error "Version number is required"
+            exit 1
+        fi
     fi
 
     # Add 'v' prefix if not present
@@ -274,6 +385,17 @@ main() {
     # Version and tagging
     print_header "Version Tagging"
     get_version
+
+    # Update files with version
+    print_header "Updating Files"
+    update_html_version
+    update_changelog
+
+    # Commit version changes
+    print_info "Committing version updates..."
+    git add index.html CHANGELOG.md
+    git commit -m "Release $VERSION" || print_warning "No changes to commit"
+
     create_git_tag
     push_tag
 
@@ -282,11 +404,18 @@ main() {
     deploy_to_s3
     verify_deployment
 
+    # CloudFront Invalidation
+    print_header "CloudFront Cache Invalidation"
+    invalidate_cloudfront
+
     # Summary
     print_header "Deployment Summary"
     print_success "Version: $VERSION"
     print_success "Branch: $CURRENT_BRANCH"
     print_success "S3 Bucket: $S3_BUCKET"
+    if [[ -n "$CLOUDFRONT_ID" ]]; then
+        print_success "CloudFront Distribution: $CLOUDFRONT_ID"
+    fi
 
     echo ""
     print_info "Website URL: http://clock.360balancedliving.com"

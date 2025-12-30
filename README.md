@@ -5,10 +5,13 @@ A web application for displaying and synchronizing multiple time zones simultane
 ## Features
 
 - **11 Time Zones**: Hawaii, Alaska, US Pacific, Arizona, US Mountain, US Central, US Eastern, United Kingdom, Philippines, New Zealand, and South Africa
-- **DST Awareness**: Automatically shows/hides Arizona clock and switches offset tables based on Daylight Saving Time
+- **Manual Time Entry**: Click on any hour or minute field to type in a custom time - all other clocks automatically synchronize
+- **DST Awareness**: Automatically shows Arizona clock during Daylight Saving Time and switches between Standard/Daylight offset tables
 - **Time Format Toggle**: Switch between 12-hour and 24-hour time formats
+- **AM/PM Toggle**: Quickly switch between AM and PM with a single button
 - **Time Adjustment**: Increment/decrement all clocks simultaneously by 1 hour or 15 minutes
-- **Real-time Updates**: Clocks update automatically every second when in live mode
+- **15-Minute Intervals**: All time adjustments automatically snap to 15-minute intervals (00, 15, 30, 45)
+- **Real-time Updates**: Clocks update automatically every second when in live mode (auto-update pauses when editing)
 - **Offset Tables**: Dynamic display of time zone offsets from Hawaii (base timezone)
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 
@@ -60,8 +63,10 @@ tz-clocks/
 
 ### Usage
 
+- **Manual Time Entry**: Click on any hour or minute field and type a time - press Enter or click away to sync all clocks
 - **Reset Clocks**: Click "Reset Clocks" to sync all clocks to current time and start live updates
-- **Adjust Time**: Use +/- buttons to adjust all clocks forward or backward
+- **Adjust Time**: Use +1/-1 Hour or +15/-15 Minutes buttons to adjust all clocks (automatically snaps to 15-minute intervals)
+- **AM/PM Toggle**: Click "AM/PM ⇄" to quickly switch between morning and afternoon
 - **Toggle Format**: Click "12/24 Hour Format" to switch between time formats
 - **View Offsets**: Check the offset table (Standard Time or Daylight Time) to see hour differences from Hawaii
 

@@ -219,3 +219,97 @@ button:hover {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
 }
+
+.version-info {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    font-style: italic;
+    font-size: 12px;
+    color: #666;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 4px;
+    z-index: 1000;
+}
+
+.version-info a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.version-info a:hover {
+    text-decoration: underline;
+}
+
+/* Changelog Modal */
+.changelog-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.changelog-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.changelog-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.changelog-close:hover,
+.changelog-close:focus {
+    color: #000;
+}
+
+.changelog-content h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.changelog-content h3 {
+    color: #007bff;
+    margin-top: 15px;
+}
+
+.changelog-content ul {
+    line-height: 1.6;
+}
+
+.version-section {
+    margin-bottom: 20px;
+}
+
+.version-section.current-version {
+    background-color: #f0f8ff;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.version-section h2 {
+    color: #007bff;
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.version-section.current-version h2 {
+    color: #0056b3;
+}

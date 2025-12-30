@@ -5,9 +5,32 @@ All notable changes to the Time Zone Clocks project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - RELEASE_DATE
 
 ### Added
+- Version display in lower left corner showing "Courtesy of 360BalancedLiving.com - version"
+- Clickable version number that displays changelog in a modal popup
+- Link to 360BalancedLiving.com website from version display
+- CloudFront cache invalidation in deployment script
+- Automatic CloudFront distribution lookup based on S3 bucket origin
+
+### Changed
+- Deployment script now automatically updates version in index.html
+- Deployment script now automatically updates CHANGELOG.md with release date
+- Enhanced deployment script to commit version changes before tagging
+- Deployment script now suggests next version number based on latest tag
+
+### Notes
+- When preparing a release, update the CHANGELOG object in js/clocks.js with the new version's changes before running deploy.sh
+
+## [1.2.0] - 2025-12-30
+
+### Added
+- **Manual time entry**: Users can now click on hour/minute fields and type in custom times
+- Enter key support for time input fields (blur and sync on Enter)
+- AM/PM toggle button for quick switching between morning/afternoon
+- Automatic synchronization when manually editing any clock
+- Auto-update pause when user manually edits time
 - Project documentation (README.md, CHANGELOG.md, DEPLOYMENT.md)
 - Automated deployment script with git tagging
 
@@ -15,11 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made offset table dynamic to show different values for Standard vs Daylight time
 - Reorganized files into cleaner directory structure
 - Updated Arizona offset calculation from Hawaii
+- Removed spinner arrows from number inputs for cleaner interface
 
 ### Fixed
 - Fixed AM/PM display issues in 12-hour format
 
-## [1.1.0] - 2024-XX-XX
+## [1.1.0] - 2025-11-28
 
 ### Added
 - South Africa time zone (SAST)
