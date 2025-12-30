@@ -2,12 +2,22 @@
 
 # Deployment script for Time Zone Clocks application
 # Deploys to S3 and creates git tags
+#
+# Usage:
+#   ./deploy.sh                    # Full deployment
+#   ./deploy.sh --invalidate-only  # Only invalidate CloudFront cache
 
 set -e  # Exit on error
 
 # Configuration
 S3_BUCKET="s3://clock.360balancedliving.com"
 MAIN_BRANCH="main"
+
+# Parse command-line arguments
+INVALIDATE_ONLY=false
+if [[ "$1" == "--invalidate-only" ]]; then
+    INVALIDATE_ONLY=true
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -82,11 +92,22 @@ get_cloudfront_distribution() {
     # Extract bucket name from S3_BUCKET
     local bucket_name=$(echo "$S3_BUCKET" | sed 's|s3://||')
 
-    # Query CloudFront distributions and find the one with our S3 bucket as origin
+    # Try multiple origin patterns:
+    # 1. Standard S3 bucket: bucket-name.s3.amazonaws.com
+    # 2. S3 website endpoint: bucket-name.s3-website-*.amazonaws.com
+
+    # First try: Standard S3 bucket origin
     CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?DomainName=='${bucket_name}.s3.amazonaws.com']].Id | [0]" --output text 2>/dev/null)
+
+    # Second try: S3 website endpoint (check if origin domain contains bucket name and s3-website)
+    if [[ -z "$CLOUDFRONT_ID" || "$CLOUDFRONT_ID" == "None" ]]; then
+        print_info "Trying S3 website endpoint pattern..."
+        CLOUDFRONT_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?contains(DomainName, '${bucket_name}') && contains(DomainName, 's3-website')]].Id | [0]" --output text 2>/dev/null)
+    fi
 
     if [[ -z "$CLOUDFRONT_ID" || "$CLOUDFRONT_ID" == "None" ]]; then
         print_warning "No CloudFront distribution found for bucket: $bucket_name"
+        print_info "Searched for: ${bucket_name}.s3.amazonaws.com and ${bucket_name}.s3-website-*.amazonaws.com"
         return 1
     fi
 
@@ -317,7 +338,9 @@ deploy_to_s3() {
         --exclude ".git/*" \
         --exclude ".idea/*" \
         --exclude ".gitignore" \
-        --exclude "*.md" \
+        --exclude "README.md" \
+        --exclude "DEPLOYMENT.md" \
+        --exclude "CLAUDE.md" \
         --exclude "deploy.sh" \
         --exclude "__pycache__/*" \
         --exclude "*.pyc" \
@@ -367,6 +390,32 @@ verify_deployment() {
 
     echo ""
     print_success "Deployment verification complete"
+}
+
+# Invalidation-only flow
+invalidate_only() {
+    print_header "CloudFront Cache Invalidation (Standalone)"
+
+    # Check AWS CLI
+    check_aws_cli
+
+    # CloudFront Invalidation
+    print_header "CloudFront Cache Invalidation"
+    invalidate_cloudfront
+
+    # Summary
+    print_header "Invalidation Summary"
+    print_success "S3 Bucket: $S3_BUCKET"
+    if [[ -n "$CLOUDFRONT_ID" ]]; then
+        print_success "CloudFront Distribution: $CLOUDFRONT_ID"
+    fi
+
+    echo ""
+    print_info "Website URL: http://clock.360balancedliving.com"
+    print_info "Cache invalidation may take 5-15 minutes to propagate"
+
+    echo ""
+    print_header "Invalidation Complete!"
 }
 
 # Main deployment flow
@@ -425,5 +474,9 @@ main() {
     print_header "Deployment Complete!"
 }
 
-# Run main function
-main
+# Run appropriate function based on arguments
+if [[ "$INVALIDATE_ONLY" == true ]]; then
+    invalidate_only
+else
+    main
+fi

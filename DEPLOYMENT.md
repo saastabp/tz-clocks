@@ -63,7 +63,8 @@ The deployment script enforces best practices by ensuring tags are only created 
 Use the included deployment script which handles tagging and deployment:
 
 ```bash
-./deploy.sh
+./deploy.sh                    # Full deployment
+./deploy.sh --invalidate-only  # Only invalidate CloudFront cache
 ```
 
 The script will:
@@ -158,9 +159,13 @@ The following are excluded from S3 deployment:
 - `.git/` - Git repository data
 - `.idea/` - IDE configuration
 - `.gitignore` - Git ignore file
-- `*.md` - Documentation files (README, CHANGELOG, DEPLOYMENT)
+- `README.md` - Project documentation (not needed on live site)
+- `DEPLOYMENT.md` - Deployment guide (not needed on live site)
+- `CLAUDE.md` - Developer guide (not needed on live site)
 - `deploy.sh` - Deployment script
 - `*.pyc`, `__pycache__/` - Python artifacts
+
+**Note**: `CHANGELOG.md` IS deployed to S3 because it's fetched by the version history modal.
 
 ## Post-Deployment Verification
 
@@ -286,14 +291,38 @@ The S3 bucket should be configured with:
 The deployment script automatically detects and invalidates CloudFront distributions:
 
 1. The script searches for CloudFront distributions with the S3 bucket as origin
-2. If found, it prompts to invalidate the cache after deployment
-3. Invalidation typically takes 5-15 minutes to complete
-4. The script will display the invalidation ID for tracking
+2. Supports both standard S3 bucket origins and S3 website endpoint origins
+3. If found, it prompts to invalidate the cache after deployment
+4. Invalidation typically takes 5-15 minutes to complete
+5. The script will display the invalidation ID for tracking
 
-**Note**: CloudFront invalidation is automatic - no manual configuration needed. The script uses:
+**Note**: CloudFront invalidation is automatic - no manual configuration needed. The script tries multiple patterns:
 ```bash
+# Standard S3 bucket
 aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?DomainName=='bucket-name.s3.amazonaws.com']].Id"
+
+# S3 website endpoint
+aws cloudfront list-distributions --query "DistributionList.Items[?Origins.Items[?contains(DomainName, 'bucket-name') && contains(DomainName, 's3-website')]].Id"
 ```
+
+### Invalidate-Only Mode
+
+If you need to invalidate the CloudFront cache without doing a full deployment:
+
+```bash
+./deploy.sh --invalidate-only
+```
+
+This is useful when:
+- Manual files were uploaded to S3
+- Cache needs to be cleared without creating a new version
+- Testing CloudFront configuration
+
+The invalidate-only mode will:
+1. Check AWS CLI is installed
+2. Look up the CloudFront distribution automatically
+3. Prompt to confirm invalidation
+4. Create the invalidation and display the invalidation ID
 
 ## Security Considerations
 

@@ -5,7 +5,23 @@ All notable changes to the Time Zone Clocks project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - RELEASE_DATE
+
+### Added
+- `--invalidate-only` option for deploy.sh to invalidate CloudFront cache without full deployment
+- CHANGELOG.md now deployed to S3 and fetched dynamically by version modal
+
+### Changed
+- Changelog modal now fetches and parses CHANGELOG.md from server (single source of truth)
+- Removed hardcoded JavaScript CHANGELOG object (no longer needed)
+- CloudFront distribution lookup now supports both standard S3 and S3 website endpoint origins
+- deploy.sh now uploads CHANGELOG.md to S3 (only excludes README.md, DEPLOYMENT.md, CLAUDE.md)
+
+### Fixed
+- CloudFront distribution lookup now correctly finds distributions using S3 website endpoints
+
+### Removed
+- JavaScript CHANGELOG object (replaced with dynamic markdown parsing)
 
 ## [1.2.1] - 2025-12-30
 

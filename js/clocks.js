@@ -574,63 +574,58 @@ const ClockApp = {
 // Global setting for 12/24 hour format
 let use24Hour = false;
 
-// Changelog data for each version (in reverse chronological order)
-const CHANGELOG = {
-    'v0.0.0': {
-        date: 'TBD',
-        added: [
-            'Version display in lower left corner of page (automatically updated during deployment)',
-            'Clickable version number that displays changelog in a modal popup',
-            'Link to 360BalancedLiving.com website from version display',
-            'CloudFront cache invalidation in deployment script',
-            'Automatic CloudFront distribution lookup based on S3 bucket origin'
-        ],
-        changed: [
-            'Deployment script now automatically updates version in index.html',
-            'Deployment script now automatically updates CHANGELOG.md with release date',
-            'Enhanced deployment script to commit version changes before tagging',
-            'Deployment script now suggests next version number based on latest tag'
-        ],
-        fixed: []
-    },
-    'v1.2.0': {
-        date: '2025-12-30',
-        added: [
-            'Manual time entry: Users can now click on hour/minute fields and type in custom times',
-            'Enter key support for time input fields (blur and sync on Enter)',
-            'AM/PM toggle button for quick switching between morning/afternoon',
-            'Automatic synchronization when manually editing any clock',
-            'Auto-update pause when user manually edits time',
-            'Project documentation (README.md, CHANGELOG.md, DEPLOYMENT.md)',
-            'Automated deployment script with git tagging'
-        ],
-        changed: [
-            'Made offset table dynamic to show different values for Standard vs Daylight time',
-            'Reorganized files into cleaner directory structure',
-            'Updated Arizona offset calculation from Hawaii',
-            'Removed spinner arrows from number inputs for cleaner interface'
-        ],
-        fixed: [
-            'Fixed AM/PM display issues in 12-hour format'
-        ]
-    },
-    'v1.1.0': {
-        date: '2025-11-28',
-        added: [
-            'South Africa time zone (SAST)',
-            'Dynamic offset tables for Standard and Daylight Saving Time',
-            'DST-aware Arizona clock visibility toggle'
-        ],
-        changed: [
-            'Improved offset calculations for accuracy across DST transitions',
-            'Enhanced responsive design for mobile devices'
-        ],
-        fixed: [
-            'Time zone offset calculations for international zones',
-            'DST detection and display logic'
-        ]
+// Parse CHANGELOG.md into structured data
+function parseChangelog(markdown) {
+    const versions = {};
+    const lines = markdown.split('\n');
+
+    let currentVersion = null;
+    let currentSection = null;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        // Match version headers: ## [1.2.1] - 2025-12-30 or ## [Unreleased]
+        const versionMatch = line.match(/^##\s+\[([^\]]+)\]\s*(?:-\s*(.+))?$/);
+        if (versionMatch) {
+            const versionNum = versionMatch[1];
+            const date = versionMatch[2] ? versionMatch[2].trim() : 'TBD';
+
+            // Skip "Unreleased" version
+            if (versionNum === 'Unreleased') {
+                currentVersion = null;
+                continue;
+            }
+
+            // Add 'v' prefix if not present
+            currentVersion = versionNum.startsWith('v') ? versionNum : 'v' + versionNum;
+            versions[currentVersion] = {
+                date: date,
+                added: [],
+                changed: [],
+                fixed: []
+            };
+            currentSection = null;
+            continue;
+        }
+
+        // Match section headers: ### Added, ### Changed, ### Fixed
+        const sectionMatch = line.match(/^###\s+(Added|Changed|Fixed)/i);
+        if (sectionMatch && currentVersion) {
+            currentSection = sectionMatch[1].toLowerCase();
+            continue;
+        }
+
+        // Match bullet points: - Item text
+        const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+        if (bulletMatch && currentVersion && currentSection) {
+            const text = bulletMatch[1].replace(/^\*\*(.+?)\*\*:?\s*/, '$1: '); // Handle **bold**: format
+            versions[currentVersion][currentSection].push(text);
+        }
     }
-};
+
+    return versions;
+}
 
 // Changelog modal functionality
 function initChangelog() {
@@ -644,61 +639,77 @@ function initChangelog() {
     const currentVersion = versionLink.textContent.trim();
 
     // Open modal when version link is clicked
-    versionLink.addEventListener('click', (e) => {
+    versionLink.addEventListener('click', async (e) => {
         e.preventDefault();
 
-        // Update modal with current version
+        // Update modal title
         modalVersion.textContent = 'History';
 
-        // Build changelog HTML for all versions
-        let html = '';
-
-        // Iterate through all versions in CHANGELOG object
-        Object.keys(CHANGELOG).forEach(version => {
-            const changelog = CHANGELOG[version];
-            const isCurrent = version === currentVersion;
-
-            // Add version header
-            html += `<div class="version-section ${isCurrent ? 'current-version' : ''}">`;
-            html += `<h2>${version}${isCurrent ? ' (Current)' : ''}</h2>`;
-            html += `<p><strong>Release Date:</strong> ${changelog.date}</p>`;
-
-            // Added section
-            if (changelog.added && changelog.added.length > 0) {
-                html += '<h3>Added</h3><ul>';
-                changelog.added.forEach(item => {
-                    html += `<li>${item}</li>`;
-                });
-                html += '</ul>';
-            }
-
-            // Changed section
-            if (changelog.changed && changelog.changed.length > 0) {
-                html += '<h3>Changed</h3><ul>';
-                changelog.changed.forEach(item => {
-                    html += `<li>${item}</li>`;
-                });
-                html += '</ul>';
-            }
-
-            // Fixed section
-            if (changelog.fixed && changelog.fixed.length > 0) {
-                html += '<h3>Fixed</h3><ul>';
-                changelog.fixed.forEach(item => {
-                    html += `<li>${item}</li>`;
-                });
-                html += '</ul>';
-            }
-
-            html += '</div>'; // Close version-section
-
-            if (!isCurrent) {
-                html += '<hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">';
-            }
-        });
-
-        changelogDetails.innerHTML = html;
+        // Show loading message
+        changelogDetails.innerHTML = '<p>Loading changelog...</p>';
         modal.style.display = 'block';
+
+        try {
+            // Fetch CHANGELOG.md from the server
+            const response = await fetch('CHANGELOG.md');
+            if (!response.ok) {
+                throw new Error('Failed to load changelog');
+            }
+
+            const markdown = await response.text();
+            const versions = parseChangelog(markdown);
+
+            // Build changelog HTML for all versions
+            let html = '';
+
+            // Iterate through all versions
+            Object.keys(versions).forEach(version => {
+                const changelog = versions[version];
+                const isCurrent = version === currentVersion;
+
+                // Add version header
+                html += `<div class="version-section ${isCurrent ? 'current-version' : ''}">`;
+                html += `<h2>${version}${isCurrent ? ' (Current)' : ''}</h2>`;
+                html += `<p><strong>Release Date:</strong> ${changelog.date}</p>`;
+
+                // Added section
+                if (changelog.added && changelog.added.length > 0) {
+                    html += '<h3>Added</h3><ul>';
+                    changelog.added.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                // Changed section
+                if (changelog.changed && changelog.changed.length > 0) {
+                    html += '<h3>Changed</h3><ul>';
+                    changelog.changed.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                // Fixed section
+                if (changelog.fixed && changelog.fixed.length > 0) {
+                    html += '<h3>Fixed</h3><ul>';
+                    changelog.fixed.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                html += '</div>'; // Close version-section
+
+                if (!isCurrent) {
+                    html += '<hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">';
+                }
+            });
+
+            changelogDetails.innerHTML = html;
+        } catch (error) {
+            changelogDetails.innerHTML = `<p>Error loading changelog: ${error.message}</p>`;
+        }
     });
 
     // Close modal when X is clicked

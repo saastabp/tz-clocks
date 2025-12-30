@@ -57,25 +57,24 @@ Located at line ~119:
 ### Changelog System
 
 **CHANGELOG.md**:
+- Single source of truth for all version history
 - Uses `[Unreleased] - RELEASE_DATE` format for work-in-progress
 - `deploy.sh` converts `[Unreleased]` → `[X.Y.Z]` and `RELEASE_DATE` → actual date
 - Creates new empty `[Unreleased]` section after deployment
+- **Deployed to S3** (not excluded like other .md files)
 
-**js/clocks.js** (lines ~577-593):
+**js/clocks.js** (lines ~577-628):
 ```javascript
-const CHANGELOG = {
-    'v0.0.0': {
-        date: 'TBD',
-        added: [...],
-        changed: [...],
-        fixed: [...]
-    }
-};
+function parseChangelog(markdown) {
+    // Parses CHANGELOG.md into structured data
+    // Automatically handles version headers, sections, and bullet points
+}
 ```
 
-- Stores changelog for modal display
-- **MUST** be manually updated before each release
-- Version keys must match HTML version (e.g., 'v1.2.1')
+- Fetches CHANGELOG.md from server when modal opens
+- Parses markdown dynamically (no hardcoded data)
+- **No manual updates needed** - always in sync with CHANGELOG.md
+- Skips `[Unreleased]` section, only shows released versions
 
 ## Deployment Workflow
 
@@ -166,20 +165,13 @@ When user clicks version number:
 ### Preparing a Release
 
 1. Review all changes since last release
-2. Ensure CHANGELOG.md [Unreleased] section is complete
-3. Update CHANGELOG object in js/clocks.js:
-   ```javascript
-   'v1.2.1': {
-       date: 'TBD',  // deploy.sh won't change this in JS
-       added: ['Feature 1', 'Feature 2'],
-       changed: [],
-       fixed: ['Bug fix']
-   }
-   ```
-4. Commit: `git add -A && git commit -m "Prepare v1.2.1 release"`
-5. Run: `./deploy.sh`
-6. Enter version or press Enter to accept suggestion
-7. Follow prompts
+2. Ensure CHANGELOG.md [Unreleased] section is complete and accurate
+3. Commit any final changes: `git add -A && git commit -m "Prepare for release"`
+4. Run: `./deploy.sh`
+5. Enter version or press Enter to accept suggestion
+6. Follow prompts
+
+**That's it!** No need to update JavaScript - the changelog modal fetches CHANGELOG.md automatically.
 
 ### Emergency Rollback
 
