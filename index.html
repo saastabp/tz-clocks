@@ -10,78 +10,81 @@
 <body>
     <div class="main-container">
         <div class="clocks-section">
+            <div class="settings-icon-container">
+                <button id="settings-gear" class="settings-gear" title="Set Base Clock">&#9881;</button>
+            </div>
             <div class="clock-table">
-                <div class="clock-column">
-                    <div class="clock-header highlight">Hawaii (HST)</div>
+                <div class="clock-column" data-tz-id="hawaii">
+                    <div class="clock-header">Hawaii (HST)</div>
                     <div class="time-inputs">
                         <input type="number" id="hawaii-hour" min="0" max="23" step="1"> :
                         <input type="number" id="hawaii-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="alaska">
                     <div class="clock-header">Alaska (AKST)</div>
                     <div class="time-inputs">
                         <input type="number" id="alaska-hour" min="0" max="23" step="1"> :
                         <input type="number" id="alaska-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="us-pacific">
                     <div class="clock-header">US Pacific (PST)</div>
                     <div class="time-inputs">
                         <input type="number" id="us-pacific-hour" min="0" max="23" step="1"> :
                         <input type="number" id="us-pacific-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column" id="arizona-clock" style="display: none;">
+                <div class="clock-column" id="arizona-clock" data-tz-id="arizona">
                     <div class="clock-header">Arizona (MST)</div>
                     <div class="time-inputs">
                         <input type="number" id="arizona-hour" min="0" max="23" step="1"> :
                         <input type="number" id="arizona-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="us-mountain">
                     <div class="clock-header">US Mountain (MST)</div>
                     <div class="time-inputs">
                         <input type="number" id="us-mountain-hour" min="0" max="23" step="1"> :
                         <input type="number" id="us-mountain-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="us-central">
                     <div class="clock-header">US Central (CST)</div>
                     <div class="time-inputs">
                         <input type="number" id="us-central-hour" min="0" max="23" step="1"> :
                         <input type="number" id="us-central-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="us-eastern">
                     <div class="clock-header">US Eastern (EST)</div>
                     <div class="time-inputs">
                         <input type="number" id="us-eastern-hour" min="0" max="23" step="1"> :
                         <input type="number" id="us-eastern-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="united-kingdom">
                     <div class="clock-header">United Kingdom (GMT)</div>
                     <div class="time-inputs">
                         <input type="number" id="united-kingdom-hour" min="0" max="23" step="1"> :
                         <input type="number" id="united-kingdom-minute" min="0" max="59" step="15">
                     </div>
                 </div>                
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="philippines">
                     <div class="clock-header">Philippines (PHT)</div>
                     <div class="time-inputs">
                         <input type="number" id="philippines-hour" min="0" max="23" step="1"> :
                         <input type="number" id="philippines-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="new-zealand">
                     <div class="clock-header">New Zealand (NZDT)</div>
                     <div class="time-inputs">
                         <input type="number" id="new-zealand-hour" min="0" max="23" step="1"> :
                         <input type="number" id="new-zealand-minute" min="0" max="59" step="15">
                     </div>
                 </div>
-                <div class="clock-column">
+                <div class="clock-column" data-tz-id="south-africa">
                     <div class="clock-header">South Africa (SAST)</div>
                     <div class="time-inputs">
                         <input type="number" id="south-africa-hour" min="0" max="23" step="1"> :
@@ -101,15 +104,14 @@
             </div>
 
             <div class="table-wrapper">
-                <div class="table-container" id="standard-table">
-                    <h3>Standard Time Offsets</h3>
-                    <table class="offset-table" id="standard-offset-table">
-                    </table>
-                </div>
-
-                <div class="table-container" id="dst-table" style="display: none;">
-                    <h3>Daylight Time Offsets</h3>
-                    <table class="offset-table" id="dst-offset-table">
+                <div class="table-container">
+                    <h3 id="offset-table-heading">HST Offsets</h3>
+                    <table class="offset-table" id="offset-table">
+                        <thead>
+                            <tr><th>Time Zone</th><th>Hours</th></tr>
+                        </thead>
+                        <tbody id="offset-table-body">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -127,6 +129,17 @@
             <h2>Version <span id="modal-version">0.0.0</span></h2>
             <div id="changelog-details">
                 <p>Loading changelog...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="settings-modal">
+        <div class="settings-content">
+            <span class="settings-close">&times;</span>
+            <h2>Set Base Clock</h2>
+            <p>Select which timezone is used as the base for offset calculations:</p>
+            <div id="base-clock-options">
             </div>
         </div>
     </div>

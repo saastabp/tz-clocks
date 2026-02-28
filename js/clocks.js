@@ -221,18 +221,60 @@ class TimeZoneClock {
     }
 }
 
+// Cookie helpers for base timezone persistence
+function setBaseClockCookie(timezoneId) {
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    document.cookie = 'baseTimezoneId=' + timezoneId + ';expires=' + expires.toUTCString() + ';path=/;SameSite=Lax';
+}
+
+function getBaseClockCookie() {
+    const match = document.cookie.match(/(?:^|;\s*)baseTimezoneId=([^;]*)/);
+    return match ? match[1] : null;
+}
+
 // Global app controller
 const ClockApp = {
     clocks: {},
     updateInterval: null,
+    baseTimezoneId: 'hawaii',
 
     init: function() {
+        this.loadBaseTimezone();
         this.createClocks();
         this.setupButtons();
         this.toggleArizonaClock();
         this.populateOffsetTables();
         this.resetClocks();
         this.addStyles();
+    },
+
+    loadBaseTimezone: function() {
+        const saved = getBaseClockCookie();
+        if (saved) {
+            const configs = this.getTimeZoneConfigs();
+            if (configs.some(c => c.id === saved)) {
+                this.baseTimezoneId = saved;
+            }
+        }
+        this.applyBaseClockHighlight();
+    },
+
+    setBaseTimezone: function(id) {
+        this.baseTimezoneId = id;
+        setBaseClockCookie(id);
+        this.applyBaseClockHighlight();
+        this.populateOffsetTables();
+    },
+
+    applyBaseClockHighlight: function() {
+        document.querySelectorAll('.clock-header').forEach(header => {
+            header.classList.remove('highlight');
+        });
+        const baseColumn = document.querySelector(`[data-tz-id="${this.baseTimezoneId}"]`);
+        if (baseColumn) {
+            baseColumn.querySelector('.clock-header').classList.add('highlight');
+        }
     },
 
     // Add CSS for the no-spinner class
@@ -305,84 +347,40 @@ const ClockApp = {
     },
 
     toggleArizonaClock: function() {
-        const arizonaClock = document.getElementById('arizona-clock');
-        const standardTable = document.getElementById('standard-table');
-        const dstTable = document.getElementById('dst-table');
-
-        if (this.isDST()) {
-            arizonaClock.style.display = '';
-            standardTable.style.display = 'none';
-            dstTable.style.display = 'block';
-        } else {
-            arizonaClock.style.display = 'none';
-            standardTable.style.display = 'block';
-            dstTable.style.display = 'none';
-        }
+        document.getElementById('arizona-clock').style.display = '';
     },
 
     populateOffsetTables: function() {
-        // Base timezone is Hawaii
-        const baseTimezone = 'US/Hawaii';
-
-        // Create a reference date for US standard time (January 15, 12:00 UTC)
-        // This is winter in Northern Hemisphere, summer in Southern Hemisphere
-        const standardDate = new Date(Date.UTC(2025, 0, 15, 12, 0, 0));
-
-        // Create a reference date for US DST (July 15, 12:00 UTC)
-        // This is summer in Northern Hemisphere, winter in Southern Hemisphere
-        const dstDate = new Date(Date.UTC(2025, 6, 15, 12, 0, 0));
-
-        // Get the base timezone offset for both dates
-        const baseStandardOffset = this.getTimezoneOffsetForDate(baseTimezone, standardDate);
-        const baseDSTOffset = this.getTimezoneOffsetForDate(baseTimezone, dstDate);
-
-        // Get the standard offset table
-        const standardTable = document.getElementById('standard-offset-table');
-        standardTable.innerHTML = '';
-
-        // Get the DST offset table
-        const dstTable = document.getElementById('dst-offset-table');
-        dstTable.innerHTML = '';
-
-        // Get all clock configurations
         const configs = this.getTimeZoneConfigs();
+        const baseConfig = configs.find(c => c.id === this.baseTimezoneId);
+        const baseTimezone = baseConfig ? baseConfig.tz : 'US/Hawaii';
+        const baseName = baseConfig ? baseConfig.name : 'HST';
 
-        // Populate standard time table (US winter time - Jan 15)
+        // Update heading with base timezone abbreviation
+        document.getElementById('offset-table-heading').textContent = baseName + ' Offsets';
+
+        // Use current date so offsets reflect actual DST state of all zones
+        const now = new Date();
+        const baseOffset = this.getTimezoneOffsetForDate(baseTimezone, now);
+
+        const tableBody = document.getElementById('offset-table-body');
+        tableBody.innerHTML = '';
+
         configs.forEach(config => {
-            const offset = this.getTimezoneOffsetForDate(config.tz, standardDate);
-            const hourDiff = Math.round((baseStandardOffset - offset) / 60);
+            const offset = this.getTimezoneOffsetForDate(config.tz, now);
+            const hourDiff = Math.round((baseOffset - offset) / 60);
 
             const row = document.createElement('tr');
             const nameCell = document.createElement('td');
             const offsetCell = document.createElement('td');
 
-            // Get display name from DOM
             const clockHeader = document.querySelector(`#${config.hourInput}`).closest('.clock-column').querySelector('.clock-header');
             nameCell.textContent = clockHeader ? clockHeader.textContent : `${config.name}`;
             offsetCell.textContent = hourDiff >= 0 ? `+${hourDiff}` : `${hourDiff}`;
 
             row.appendChild(nameCell);
             row.appendChild(offsetCell);
-            standardTable.appendChild(row);
-        });
-
-        // Populate DST table (US summer time - July 15)
-        configs.forEach(config => {
-            const offset = this.getTimezoneOffsetForDate(config.tz, dstDate);
-            const hourDiff = Math.round((baseDSTOffset - offset) / 60);
-
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            const offsetCell = document.createElement('td');
-
-            // Get display name from DOM
-            const clockHeader = document.querySelector(`#${config.hourInput}`).closest('.clock-column').querySelector('.clock-header');
-            nameCell.textContent = clockHeader ? clockHeader.textContent : `${config.name}`;
-            offsetCell.textContent = hourDiff >= 0 ? `+${hourDiff}` : `${hourDiff}`;
-
-            row.appendChild(nameCell);
-            row.appendChild(offsetCell);
-            dstTable.appendChild(row);
+            tableBody.appendChild(row);
         });
     },
 
@@ -732,8 +730,66 @@ function initChangelog() {
     });
 }
 
+// Settings modal functionality
+function initSettings() {
+    const modal = document.getElementById('settings-modal');
+    const gearButton = document.getElementById('settings-gear');
+    const closeBtn = document.querySelector('.settings-close');
+    const optionsContainer = document.getElementById('base-clock-options');
+
+    const configs = ClockApp.getTimeZoneConfigs();
+
+    configs.forEach(config => {
+        const label = document.createElement('label');
+        label.className = 'base-clock-option';
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'base-clock';
+        radio.value = config.id;
+
+        const clockHeader = document.querySelector(`#${config.hourInput}`)
+            .closest('.clock-column').querySelector('.clock-header');
+        const displayName = clockHeader ? clockHeader.textContent : config.name;
+
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(displayName));
+        optionsContainer.appendChild(label);
+    });
+
+    gearButton.addEventListener('click', () => {
+        const currentRadio = optionsContainer.querySelector(`input[value="${ClockApp.baseTimezoneId}"]`);
+        if (currentRadio) currentRadio.checked = true;
+        modal.style.display = 'block';
+    });
+
+    optionsContainer.addEventListener('change', (e) => {
+        if (e.target.name === 'base-clock') {
+            ClockApp.setBaseTimezone(e.target.value);
+            modal.style.display = 'none';
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+}
+
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     ClockApp.init();
     initChangelog();
+    initSettings();
 });

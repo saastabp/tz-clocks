@@ -5,7 +5,24 @@ All notable changes to the Time Zone Clocks project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - RELEASE_DATE
+
+### Added
+- Settings gear icon to select base clock for offset calculations
+- Settings modal with radio button selection for all 11 time zones
+- Cookie persistence for base clock preference (1-year expiry)
+- Dynamic highlight (red) on whichever clock is selected as the base
+- Table header row (Time Zone / Hours) on offset table
+
+### Changed
+- Offset table heading now shows base timezone abbreviation (e.g., "HST Offsets", "NZDT Offsets")
+- Offset values now calculated from current date, correctly reflecting DST state of all time zones
+- Arizona clock is now always visible (no longer hidden during standard time)
+- Replaced two separate offset tables (Standard/Daylight) with a single dynamic table
+- Updated favicon with transparent background
+
+### Fixed
+- Offset table DST toggle now follows the base clock's timezone instead of US-only DST rules
 
 ## [1.2.2] - 2025-12-30
 
