@@ -6,7 +6,7 @@ A web application for displaying and synchronizing multiple time zones simultane
 
 - **11 Time Zones**: Hawaii, Alaska, US Pacific, Arizona, US Mountain, US Central, US Eastern, United Kingdom, Philippines, New Zealand, and South Africa
 - **Manual Time Entry**: Click on any hour or minute field to type in a custom time - all other clocks automatically synchronize
-- **DST Awareness**: Automatically shows Arizona clock during Daylight Saving Time and switches between Standard/Daylight offset tables
+- **DST Awareness**: Clock labels dynamically reflect each zone's current DST state (e.g., PST/PDT, GMT/BST, NZST/NZDT)
 - **Time Format Toggle**: Switch between 12-hour and 24-hour time formats
 - **AM/PM Toggle**: Quickly switch between AM and PM with a single button
 - **Time Adjustment**: Increment/decrement all clocks simultaneously by 1 hour or 15 minutes
@@ -81,19 +81,13 @@ The application uses JavaScript's `Intl.DateTimeFormat` API to handle time zone 
 
 ### DST Detection
 
-DST status is calculated based on US DST rules:
-- Starts: Second Sunday in March at 2:00 AM
-- Ends: First Sunday in November at 2:00 AM
+Each time zone's DST status is determined independently by comparing its UTC offset in January, July, and the current date. If the January and July offsets differ, the zone observes DST. The current offset is then compared to determine whether the zone is currently in standard or daylight saving time. This works correctly for all hemispheres and DST schedules.
 
-When DST is active, the Arizona clock becomes visible (since Arizona doesn't observe DST, it aligns differently with other zones during summer).
+Clock labels automatically update to reflect the correct abbreviation (e.g., PST→PDT, GMT→BST, NZST→NZDT).
 
-### Offset Tables
+### Offset Table
 
-Two offset tables are generated:
-- **Standard Time**: Based on January 15 reference date
-- **Daylight Time**: Based on July 15 reference date
-
-All offsets are calculated relative to Hawaii (HST).
+A single dynamic offset table shows hour differences from the selected base timezone, calculated using actual current offsets.
 
 ## Browser Compatibility
 

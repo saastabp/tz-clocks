@@ -5,7 +5,12 @@ All notable changes to the Time Zone Clocks project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - RELEASE_DATE
+
+### Fixed
+- Clock labels now dynamically reflect each zone's current DST state (e.g., PST/PDT, EST/EDT, GMT/BST, NZST/NZDT)
+- Labels previously showed only standard time abbreviations regardless of DST status
+- DST detection now works independently per timezone using UTC offset comparison, supporting all hemispheres and DST schedules
 
 ## [1.3.1] - 2026-02-28
 

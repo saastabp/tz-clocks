@@ -243,6 +243,7 @@ const ClockApp = {
         this.loadBaseTimezone();
         this.createClocks();
         this.setupButtons();
+        this.updateClockLabels();
         this.toggleArizonaClock();
         this.populateOffsetTables();
         this.resetClocks();
@@ -275,6 +276,19 @@ const ClockApp = {
         if (baseColumn) {
             baseColumn.querySelector('.clock-header').classList.add('highlight');
         }
+    },
+
+    updateClockLabels: function() {
+        const configs = this.getTimeZoneConfigs();
+        configs.forEach(config => {
+            const column = document.querySelector(`[data-tz-id="${config.id}"]`);
+            if (column) {
+                const header = column.querySelector('.clock-header');
+                if (header) {
+                    header.textContent = config.label + ' (' + config.name + ')';
+                }
+            }
+        });
     },
 
     // Add CSS for the no-spinner class
@@ -311,19 +325,34 @@ const ClockApp = {
 
     getTimeZoneConfigs: function() {
         // Base configurations with GMT offsets
+        // stdName/dstName: abbreviations for standard and daylight saving time
         const zones = [
-            { id: 'hawaii', name: 'HST', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', tz: 'US/Hawaii' },
-            { id: 'alaska', name: 'AKST', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', tz: 'US/Alaska' },
-            { id: 'us-pacific', name: 'PST', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', tz: 'US/Pacific' },
-            { id: 'arizona', name: 'MST', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', tz: 'US/Arizona' },
-            { id: 'us-mountain', name: 'MST', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', tz: 'US/Mountain' },
-            { id: 'us-central', name: 'CST', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', tz: 'US/Central' },
-            { id: 'us-eastern', name: 'EST', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', tz: 'US/Eastern' },
-            { id: 'united-kingdom', name: 'GMT', hourInput: 'united-kingdom-hour', minuteInput: 'united-kingdom-minute', tz: 'Greenwich'},
-            { id: 'philippines', name: 'PHT', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', tz: 'Asia/Manila' },
-            { id: 'new-zealand', name: 'NZDT', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'},
-            { id: 'south-africa', name: 'SAST', hourInput: 'south-africa-hour', minuteInput: 'south-africa-minute', tz: 'Africa/Johannesburg'}
+            { id: 'hawaii', stdName: 'HST', dstName: 'HST', label: 'Hawaii', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', tz: 'US/Hawaii' },
+            { id: 'alaska', stdName: 'AKST', dstName: 'AKDT', label: 'Alaska', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', tz: 'US/Alaska' },
+            { id: 'us-pacific', stdName: 'PST', dstName: 'PDT', label: 'US Pacific', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', tz: 'US/Pacific' },
+            { id: 'arizona', stdName: 'MST', dstName: 'MST', label: 'Arizona', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', tz: 'US/Arizona' },
+            { id: 'us-mountain', stdName: 'MST', dstName: 'MDT', label: 'US Mountain', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', tz: 'US/Mountain' },
+            { id: 'us-central', stdName: 'CST', dstName: 'CDT', label: 'US Central', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', tz: 'US/Central' },
+            { id: 'us-eastern', stdName: 'EST', dstName: 'EDT', label: 'US Eastern', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', tz: 'US/Eastern' },
+            { id: 'united-kingdom', stdName: 'GMT', dstName: 'BST', label: 'United Kingdom', hourInput: 'united-kingdom-hour', minuteInput: 'united-kingdom-minute', tz: 'Greenwich'},
+            { id: 'philippines', stdName: 'PHT', dstName: 'PHT', label: 'Philippines', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', tz: 'Asia/Manila' },
+            { id: 'new-zealand', stdName: 'NZST', dstName: 'NZDT', label: 'New Zealand', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'},
+            { id: 'south-africa', stdName: 'SAST', dstName: 'SAST', label: 'South Africa', hourInput: 'south-africa-hour', minuteInput: 'south-africa-minute', tz: 'Africa/Johannesburg'}
         ];
+
+        // Set the current name based on whether each zone is in DST
+        const now = new Date();
+        const year = now.getFullYear();
+        const jan = new Date(year, 0, 1);
+        const jul = new Date(year, 6, 1);
+        zones.forEach(zone => {
+            const janOffset = this.getTimezoneOffsetForDate(zone.tz, jan);
+            const julOffset = this.getTimezoneOffsetForDate(zone.tz, jul);
+            const curOffset = this.getTimezoneOffsetForDate(zone.tz, now);
+            // DST moves clocks forward, reducing the offset-from-UTC value
+            const isDST = janOffset !== julOffset && curOffset === Math.min(janOffset, julOffset);
+            zone.name = isDST ? zone.dstName : zone.stdName;
+        });
 
         return zones;
     },
