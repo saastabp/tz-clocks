@@ -233,6 +233,17 @@ function getBaseClockCookie() {
     return match ? match[1] : null;
 }
 
+function setTimeFormatCookie(is24Hour) {
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    document.cookie = 'timeFormat=' + (is24Hour ? '24' : '12') + ';expires=' + expires.toUTCString() + ';path=/;SameSite=Lax';
+}
+
+function getTimeFormatCookie() {
+    const match = document.cookie.match(/(?:^|;\s*)timeFormat=([^;]*)/);
+    return match ? match[1] : null;
+}
+
 // Global app controller
 const ClockApp = {
     clocks: {},
@@ -241,6 +252,7 @@ const ClockApp = {
 
     init: function() {
         this.loadBaseTimezone();
+        this.loadTimeFormat();
         this.createClocks();
         this.setupButtons();
         this.updateClockLabels();
@@ -259,6 +271,13 @@ const ClockApp = {
             }
         }
         this.applyBaseClockHighlight();
+    },
+
+    loadTimeFormat: function() {
+        const saved = getTimeFormatCookie();
+        if (saved === '24') {
+            use24Hour = true;
+        }
     },
 
     setBaseTimezone: function(id) {
@@ -561,6 +580,7 @@ const ClockApp = {
 
     toggleFormat: function() {
         use24Hour = !use24Hour;
+        setTimeFormatCookie(use24Hour);
         Object.values(this.clocks).forEach(clock => {
             clock.updateDisplay();
         });

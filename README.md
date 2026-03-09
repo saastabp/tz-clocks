@@ -7,7 +7,7 @@ A web application for displaying and synchronizing multiple time zones simultane
 - **11 Time Zones**: Hawaii, Alaska, US Pacific, Arizona, US Mountain, US Central, US Eastern, United Kingdom, Philippines, New Zealand, and South Africa
 - **Manual Time Entry**: Click on any hour or minute field to type in a custom time - all other clocks automatically synchronize
 - **DST Awareness**: Clock labels dynamically reflect each zone's current DST state (e.g., PST/PDT, GMT/BST, NZST/NZDT)
-- **Time Format Toggle**: Switch between 12-hour and 24-hour time formats
+- **Time Format Toggle**: Switch between 12-hour and 24-hour time formats (preference saved across sessions)
 - **AM/PM Toggle**: Quickly switch between AM and PM with a single button
 - **Time Adjustment**: Increment/decrement all clocks simultaneously by 1 hour or 15 minutes
 - **15-Minute Intervals**: All time adjustments automatically snap to 15-minute intervals (00, 15, 30, 45)
