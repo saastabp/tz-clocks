@@ -2,11 +2,6 @@
 /* Existing styles */
 body {
     font-family: Arial, sans-serif;
-    background-image: url('../images/360-bal-logo-no-text-transparent.png');
-    background-size:50%;
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-attachment: fixed;
     margin: 0;
     padding: 20px;
     min-height: 100vh;
@@ -20,6 +15,7 @@ body {
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
+    align-items: flex-start;
 }
 
 .clocks-section {
@@ -27,14 +23,60 @@ body {
     min-width: 300px;
 }
 
+.clock-section {
+    max-width: 1200px;
+    margin: 0 auto 20px;
+}
+
+.title-banner {
+    position: relative;
+    background: rgba(232, 245, 233, 0.85);
+    border-bottom: 3px solid #2e7d32;
+    border-radius: 4px;
+    padding: 14px 24px;
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+.title-banner-logo-link {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+}
+
+.title-banner-logo {
+    height: 44px;
+    width: auto;
+    display: block;
+}
+
+.title-banner h1 {
+    margin: 0;
+    color: #1b5e20;
+    font-size: 1.8em;
+    letter-spacing: 0.02em;
+}
+
+.section-banner {
+    background: rgba(232, 245, 233, 0.85);
+    color: #1b5e20;
+    border-left: 4px solid #2e7d32;
+    padding: 10px 16px;
+    margin: 0 0 10px;
+    font-size: 1.15em;
+    border-radius: 4px;
+}
+
 .clock-table {
     width: 100%;
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 20px;
-    background: rgba(255, 255, 255, 0.9);
     padding: 20px;
     border-radius: 8px;
     align-items: start;  /* Add this line */
@@ -64,9 +106,10 @@ body {
 
 /* Settings Gear Icon */
 .settings-icon-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: -10px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .settings-gear {
@@ -102,19 +145,14 @@ body {
     padding: 5px;
 }
 
-.table-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
+.offset-panel {
+    width: 280px;
+    flex-shrink: 0;
 }
 
-.table-container {
-    width: 250px;
-}
-
-.table-container h3 {
+.offset-panel h3 {
     text-align: center;
+    margin-top: 0;
     margin-bottom: 10px;
     color: #333;
 }
@@ -138,6 +176,48 @@ body {
     text-align: center;
 }
 
+.offset-section {
+    margin-bottom: 8px;
+}
+
+.offset-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(232, 245, 233, 0.85);
+    color: #1b5e20;
+    border: none;
+    border-left: 4px solid #2e7d32;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left;
+    font-family: inherit;
+    transition: background-color 0.2s;
+}
+
+.offset-section-header:hover {
+    background: rgba(212, 234, 215, 0.85);
+}
+
+.offset-section-indicator {
+    font-size: 10px;
+    width: 12px;
+    display: inline-block;
+    text-align: center;
+}
+
+.offset-section-body {
+    margin-top: 6px;
+}
+
+.offset-section-body[hidden] {
+    display: none;
+}
+
 .button-container {
     text-align: center;
     margin: 20px 0;
@@ -151,7 +231,7 @@ button {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #007bff;
+    background-color: #125773;
     color: white;
     border: none;
     border-radius: 4px;
@@ -159,7 +239,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #0d3f54;
 }
 
 .ampm {
@@ -183,11 +263,20 @@ button:hover {
         width: 100%;
     }
 
+    .clock-section {
+        margin-bottom: 12px;
+    }
+
+    .section-banner {
+        font-size: 1em;
+        padding: 8px 12px;
+    }
+
     .clock-table {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 8px;
         padding: 10px;
-        margin: 10px auto;
+        margin: 0 auto;
         width: 100%;
     }
 
@@ -210,15 +299,10 @@ button:hover {
         font-size: 14px;
     }
 
-    .table-wrapper {
+    .offset-panel {
         margin-top: 10px;
-        justify-content: center;
         width: 100%;
-    }
-
-    .table-container {
-        width: 80%;
-        max-width: 250px;
+        max-width: 320px;
     }
 
     .clock-header {
@@ -267,7 +351,7 @@ button:hover {
 }
 
 .version-info a {
-    color: #007bff;
+    color: #125773;
     text-decoration: none;
 }
 
@@ -296,6 +380,7 @@ button:hover {
     max-width: 600px;
     max-height: 70vh;
     overflow-y: auto;
+    overscroll-behavior: contain;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
@@ -361,11 +446,14 @@ button:hover {
 
 .settings-content {
     background-color: white;
-    margin: 10% auto;
+    margin: 5vh auto;
     padding: 20px;
     border-radius: 8px;
     width: 80%;
     max-width: 400px;
+    max-height: 85vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 

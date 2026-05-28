@@ -5,7 +5,18 @@ All notable changes to the Time Zone Clocks project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - RELEASE_DATE
+
+### Added
+- Canada time zones: Yukon, Canada Pacific, Canada Mountain, Saskatchewan, Canada Central, Canada Eastern, Atlantic, Newfoundland
+- Sectioned clock display: clocks are now grouped into United States, Canada, and International sections, each with a tinted banner heading
+- Collapsible accordion offset table grouped by region (United States / Canada / International); exactly one section open at a time, with the open section remembered in a cookie (1-year expiry)
+
+### Changed
+- Offset table now shows fractional hours (one decimal place) to accurately reflect Newfoundland's half-hour offset (UTC-3:30)
+
+### Fixed
+- United Kingdom clock now correctly switches to BST (UTC+1) during British Summer Time; previously used the `Greenwich` zone which stays on UTC year-round
 
 ## [1.3.3] - 2026-03-08
 

@@ -8,90 +8,168 @@
     <link rel="stylesheet" href="css/clocks.css">
 </head>
 <body>
+    <header class="title-banner">
+        <a href="https://360balancedliving.com" target="_blank" rel="noopener" class="title-banner-logo-link">
+            <img src="images/360-bal-logo-no-text-transparent.png" alt="360 Balanced Living" class="title-banner-logo">
+        </a>
+        <h1>Time Zone Clocks</h1>
+        <div class="settings-icon-container">
+            <button id="settings-gear" class="settings-gear" title="Set Base Clock">&#9881;</button>
+        </div>
+    </header>
+
     <div class="main-container">
         <div class="clocks-section">
-            <div class="settings-icon-container">
-                <button id="settings-gear" class="settings-gear" title="Set Base Clock">&#9881;</button>
-            </div>
-            <div class="clock-table">
-                <div class="clock-column" data-tz-id="hawaii">
-                    <div class="clock-header">Hawaii (HST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="hawaii-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="hawaii-minute" min="0" max="59" step="15">
+            <section class="clock-section" data-region="us">
+                <h2 class="section-banner">United States</h2>
+                <div class="clock-table">
+                    <div class="clock-column" data-tz-id="hawaii">
+                        <div class="clock-header">Hawaii (HST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="hawaii-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="hawaii-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="alaska">
+                        <div class="clock-header">Alaska (AKST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="alaska-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="alaska-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="us-pacific">
+                        <div class="clock-header">US Pacific (PST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="us-pacific-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="us-pacific-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" id="arizona-clock" data-tz-id="arizona">
+                        <div class="clock-header">Arizona (MST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="arizona-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="arizona-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="us-mountain">
+                        <div class="clock-header">US Mountain (MST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="us-mountain-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="us-mountain-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="us-central">
+                        <div class="clock-header">US Central (CST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="us-central-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="us-central-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="us-eastern">
+                        <div class="clock-header">US Eastern (EST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="us-eastern-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="us-eastern-minute" min="0" max="59" step="15">
+                        </div>
                     </div>
                 </div>
-                <div class="clock-column" data-tz-id="alaska">
-                    <div class="clock-header">Alaska (AKST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="alaska-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="alaska-minute" min="0" max="59" step="15">
+            </section>
+
+            <section class="clock-section" data-region="canada">
+                <h2 class="section-banner">Canada</h2>
+                <div class="clock-table">
+                    <div class="clock-column" data-tz-id="yukon">
+                        <div class="clock-header">Yukon (MST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="yukon-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="yukon-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="canada-pacific">
+                        <div class="clock-header">Canada Pacific (PST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="canada-pacific-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="canada-pacific-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="canada-mountain">
+                        <div class="clock-header">Canada Mountain (MST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="canada-mountain-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="canada-mountain-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="saskatchewan">
+                        <div class="clock-header">Saskatchewan (CST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="saskatchewan-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="saskatchewan-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="canada-central">
+                        <div class="clock-header">Canada Central (CST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="canada-central-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="canada-central-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="canada-eastern">
+                        <div class="clock-header">Canada Eastern (EST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="canada-eastern-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="canada-eastern-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="atlantic">
+                        <div class="clock-header">Atlantic (AST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="atlantic-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="atlantic-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="newfoundland">
+                        <div class="clock-header">Newfoundland (NST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="newfoundland-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="newfoundland-minute" min="0" max="59" step="15">
+                        </div>
                     </div>
                 </div>
-                <div class="clock-column" data-tz-id="us-pacific">
-                    <div class="clock-header">US Pacific (PST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="us-pacific-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="us-pacific-minute" min="0" max="59" step="15">
+            </section>
+
+            <section class="clock-section" data-region="international">
+                <h2 class="section-banner">International</h2>
+                <div class="clock-table">
+                    <div class="clock-column" data-tz-id="united-kingdom">
+                        <div class="clock-header">United Kingdom (GMT)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="united-kingdom-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="united-kingdom-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="philippines">
+                        <div class="clock-header">Philippines (PHT)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="philippines-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="philippines-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="new-zealand">
+                        <div class="clock-header">New Zealand (NZDT)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="new-zealand-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="new-zealand-minute" min="0" max="59" step="15">
+                        </div>
+                    </div>
+                    <div class="clock-column" data-tz-id="south-africa">
+                        <div class="clock-header">South Africa (SAST)</div>
+                        <div class="time-inputs">
+                            <input type="number" id="south-africa-hour" min="0" max="23" step="1"> :
+                            <input type="number" id="south-africa-minute" min="0" max="59" step="15">
+                        </div>
                     </div>
                 </div>
-                <div class="clock-column" id="arizona-clock" data-tz-id="arizona">
-                    <div class="clock-header">Arizona (MST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="arizona-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="arizona-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-                <div class="clock-column" data-tz-id="us-mountain">
-                    <div class="clock-header">US Mountain (MST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="us-mountain-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="us-mountain-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-                <div class="clock-column" data-tz-id="us-central">
-                    <div class="clock-header">US Central (CST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="us-central-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="us-central-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-                <div class="clock-column" data-tz-id="us-eastern">
-                    <div class="clock-header">US Eastern (EST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="us-eastern-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="us-eastern-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-                <div class="clock-column" data-tz-id="united-kingdom">
-                    <div class="clock-header">United Kingdom (GMT)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="united-kingdom-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="united-kingdom-minute" min="0" max="59" step="15">
-                    </div>
-                </div>                
-                <div class="clock-column" data-tz-id="philippines">
-                    <div class="clock-header">Philippines (PHT)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="philippines-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="philippines-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-                <div class="clock-column" data-tz-id="new-zealand">
-                    <div class="clock-header">New Zealand (NZDT)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="new-zealand-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="new-zealand-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-                <div class="clock-column" data-tz-id="south-africa">
-                    <div class="clock-header">South Africa (SAST)</div>
-                    <div class="time-inputs">
-                        <input type="number" id="south-africa-hour" min="0" max="23" step="1"> :
-                        <input type="number" id="south-africa-minute" min="0" max="59" step="15">
-                    </div>
-                </div>
-            </div>
+            </section>
 
             <div class="button-container">
                 <button id="reset-button">Reset Clocks</button>
@@ -102,20 +180,53 @@
                 <button id="decrement-button-min">-15 Minutes</button>
                 <button id="format-toggle">12/24 Hour Format</button>
             </div>
+        </div>
 
-            <div class="table-wrapper">
-                <div class="table-container">
-                    <h3 id="offset-table-heading">HST Offsets</h3>
-                    <table class="offset-table" id="offset-table">
+        <aside class="offset-panel">
+            <h3 id="offset-table-heading">HST Offsets</h3>
+            <div class="offset-section" data-region="us">
+                <button class="offset-section-header" type="button">
+                    <span class="offset-section-indicator">&#9660;</span>
+                    <span class="offset-section-title">United States</span>
+                </button>
+                <div class="offset-section-body">
+                    <table class="offset-table">
                         <thead>
                             <tr><th>Time Zone</th><th>Hours</th></tr>
                         </thead>
-                        <tbody id="offset-table-body">
-                        </tbody>
+                        <tbody id="offset-tbody-us"></tbody>
                     </table>
                 </div>
             </div>
-        </div>
+            <div class="offset-section" data-region="canada">
+                <button class="offset-section-header" type="button">
+                    <span class="offset-section-indicator">&#9654;</span>
+                    <span class="offset-section-title">Canada</span>
+                </button>
+                <div class="offset-section-body" hidden>
+                    <table class="offset-table">
+                        <thead>
+                            <tr><th>Time Zone</th><th>Hours</th></tr>
+                        </thead>
+                        <tbody id="offset-tbody-canada"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="offset-section" data-region="international">
+                <button class="offset-section-header" type="button">
+                    <span class="offset-section-indicator">&#9654;</span>
+                    <span class="offset-section-title">International</span>
+                </button>
+                <div class="offset-section-body" hidden>
+                    <table class="offset-table">
+                        <thead>
+                            <tr><th>Time Zone</th><th>Hours</th></tr>
+                        </thead>
+                        <tbody id="offset-tbody-international"></tbody>
+                    </table>
+                </div>
+            </div>
+        </aside>
     </div>
 
     <div class="version-info">

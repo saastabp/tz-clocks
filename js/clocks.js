@@ -244,6 +244,17 @@ function getTimeFormatCookie() {
     return match ? match[1] : null;
 }
 
+function setOffsetSectionCookie(region) {
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    document.cookie = 'offsetSection=' + region + ';expires=' + expires.toUTCString() + ';path=/;SameSite=Lax';
+}
+
+function getOffsetSectionCookie() {
+    const match = document.cookie.match(/(?:^|;\s*)offsetSection=([^;]*)/);
+    return match ? match[1] : null;
+}
+
 // Global app controller
 const ClockApp = {
     clocks: {},
@@ -346,17 +357,25 @@ const ClockApp = {
         // Base configurations with GMT offsets
         // stdName/dstName: abbreviations for standard and daylight saving time
         const zones = [
-            { id: 'hawaii', stdName: 'HST', dstName: 'HST', label: 'Hawaii', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', tz: 'US/Hawaii' },
-            { id: 'alaska', stdName: 'AKST', dstName: 'AKDT', label: 'Alaska', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', tz: 'US/Alaska' },
-            { id: 'us-pacific', stdName: 'PST', dstName: 'PDT', label: 'US Pacific', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', tz: 'US/Pacific' },
-            { id: 'arizona', stdName: 'MST', dstName: 'MST', label: 'Arizona', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', tz: 'US/Arizona' },
-            { id: 'us-mountain', stdName: 'MST', dstName: 'MDT', label: 'US Mountain', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', tz: 'US/Mountain' },
-            { id: 'us-central', stdName: 'CST', dstName: 'CDT', label: 'US Central', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', tz: 'US/Central' },
-            { id: 'us-eastern', stdName: 'EST', dstName: 'EDT', label: 'US Eastern', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', tz: 'US/Eastern' },
-            { id: 'united-kingdom', stdName: 'GMT', dstName: 'BST', label: 'United Kingdom', hourInput: 'united-kingdom-hour', minuteInput: 'united-kingdom-minute', tz: 'Greenwich'},
-            { id: 'philippines', stdName: 'PHT', dstName: 'PHT', label: 'Philippines', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', tz: 'Asia/Manila' },
-            { id: 'new-zealand', stdName: 'NZST', dstName: 'NZDT', label: 'New Zealand', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'},
-            { id: 'south-africa', stdName: 'SAST', dstName: 'SAST', label: 'South Africa', hourInput: 'south-africa-hour', minuteInput: 'south-africa-minute', tz: 'Africa/Johannesburg'}
+            { id: 'hawaii', region: 'us', stdName: 'HST', dstName: 'HST', label: 'Hawaii', hourInput: 'hawaii-hour', minuteInput: 'hawaii-minute', tz: 'US/Hawaii' },
+            { id: 'alaska', region: 'us', stdName: 'AKST', dstName: 'AKDT', label: 'Alaska', hourInput: 'alaska-hour', minuteInput: 'alaska-minute', tz: 'US/Alaska' },
+            { id: 'us-pacific', region: 'us', stdName: 'PST', dstName: 'PDT', label: 'US Pacific', hourInput: 'us-pacific-hour', minuteInput: 'us-pacific-minute', tz: 'US/Pacific' },
+            { id: 'arizona', region: 'us', stdName: 'MST', dstName: 'MST', label: 'Arizona', hourInput: 'arizona-hour', minuteInput: 'arizona-minute', tz: 'US/Arizona' },
+            { id: 'us-mountain', region: 'us', stdName: 'MST', dstName: 'MDT', label: 'US Mountain', hourInput: 'us-mountain-hour', minuteInput: 'us-mountain-minute', tz: 'US/Mountain' },
+            { id: 'us-central', region: 'us', stdName: 'CST', dstName: 'CDT', label: 'US Central', hourInput: 'us-central-hour', minuteInput: 'us-central-minute', tz: 'US/Central' },
+            { id: 'us-eastern', region: 'us', stdName: 'EST', dstName: 'EDT', label: 'US Eastern', hourInput: 'us-eastern-hour', minuteInput: 'us-eastern-minute', tz: 'US/Eastern' },
+            { id: 'yukon', region: 'canada', stdName: 'MST', dstName: 'MST', label: 'Yukon', hourInput: 'yukon-hour', minuteInput: 'yukon-minute', tz: 'America/Whitehorse' },
+            { id: 'canada-pacific', region: 'canada', stdName: 'PST', dstName: 'PDT', label: 'Canada Pacific', hourInput: 'canada-pacific-hour', minuteInput: 'canada-pacific-minute', tz: 'America/Vancouver' },
+            { id: 'canada-mountain', region: 'canada', stdName: 'MST', dstName: 'MDT', label: 'Canada Mountain', hourInput: 'canada-mountain-hour', minuteInput: 'canada-mountain-minute', tz: 'America/Edmonton' },
+            { id: 'saskatchewan', region: 'canada', stdName: 'CST', dstName: 'CST', label: 'Saskatchewan', hourInput: 'saskatchewan-hour', minuteInput: 'saskatchewan-minute', tz: 'America/Regina' },
+            { id: 'canada-central', region: 'canada', stdName: 'CST', dstName: 'CDT', label: 'Canada Central', hourInput: 'canada-central-hour', minuteInput: 'canada-central-minute', tz: 'America/Winnipeg' },
+            { id: 'canada-eastern', region: 'canada', stdName: 'EST', dstName: 'EDT', label: 'Canada Eastern', hourInput: 'canada-eastern-hour', minuteInput: 'canada-eastern-minute', tz: 'America/Toronto' },
+            { id: 'atlantic', region: 'canada', stdName: 'AST', dstName: 'ADT', label: 'Atlantic', hourInput: 'atlantic-hour', minuteInput: 'atlantic-minute', tz: 'America/Halifax' },
+            { id: 'newfoundland', region: 'canada', stdName: 'NST', dstName: 'NDT', label: 'Newfoundland', hourInput: 'newfoundland-hour', minuteInput: 'newfoundland-minute', tz: 'America/St_Johns' },
+            { id: 'united-kingdom', region: 'international', stdName: 'GMT', dstName: 'BST', label: 'United Kingdom', hourInput: 'united-kingdom-hour', minuteInput: 'united-kingdom-minute', tz: 'Europe/London'},
+            { id: 'philippines', region: 'international', stdName: 'PHT', dstName: 'PHT', label: 'Philippines', hourInput: 'philippines-hour', minuteInput: 'philippines-minute', tz: 'Asia/Manila' },
+            { id: 'new-zealand', region: 'international', stdName: 'NZST', dstName: 'NZDT', label: 'New Zealand', hourInput: 'new-zealand-hour', minuteInput: 'new-zealand-minute', tz: 'Pacific/Auckland'},
+            { id: 'south-africa', region: 'international', stdName: 'SAST', dstName: 'SAST', label: 'South Africa', hourInput: 'south-africa-hour', minuteInput: 'south-africa-minute', tz: 'Africa/Johannesburg'}
         ];
 
         // Set the current name based on whether each zone is in DST
@@ -411,24 +430,30 @@ const ClockApp = {
         const now = new Date();
         const baseOffset = this.getTimezoneOffsetForDate(baseTimezone, now);
 
-        const tableBody = document.getElementById('offset-table-body');
-        tableBody.innerHTML = '';
+        const regions = ['us', 'canada', 'international'];
+        regions.forEach(region => {
+            const tbody = document.getElementById('offset-tbody-' + region);
+            if (!tbody) return;
+            tbody.innerHTML = '';
 
-        configs.forEach(config => {
-            const offset = this.getTimezoneOffsetForDate(config.tz, now);
-            const hourDiff = Math.round((baseOffset - offset) / 60);
+            configs.filter(c => c.region === region).forEach(config => {
+                const offset = this.getTimezoneOffsetForDate(config.tz, now);
+                // Round to one decimal place to surface half-hour offsets (e.g. Newfoundland)
+                const hourDiff = Math.round(((baseOffset - offset) / 60) * 10) / 10;
+                const display = Number.isInteger(hourDiff) ? hourDiff.toString() : hourDiff.toFixed(1);
 
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            const offsetCell = document.createElement('td');
+                const row = document.createElement('tr');
+                const nameCell = document.createElement('td');
+                const offsetCell = document.createElement('td');
 
-            const clockHeader = document.querySelector(`#${config.hourInput}`).closest('.clock-column').querySelector('.clock-header');
-            nameCell.textContent = clockHeader ? clockHeader.textContent : `${config.name}`;
-            offsetCell.textContent = hourDiff >= 0 ? `+${hourDiff}` : `${hourDiff}`;
+                const clockHeader = document.querySelector(`#${config.hourInput}`).closest('.clock-column').querySelector('.clock-header');
+                nameCell.textContent = clockHeader ? clockHeader.textContent : `${config.name}`;
+                offsetCell.textContent = hourDiff >= 0 ? `+${display}` : `${display}`;
 
-            row.appendChild(nameCell);
-            row.appendChild(offsetCell);
-            tableBody.appendChild(row);
+                row.appendChild(nameCell);
+                row.appendChild(offsetCell);
+                tbody.appendChild(row);
+            });
         });
     },
 
@@ -836,9 +861,45 @@ function initSettings() {
     });
 }
 
+// Offset table accordion: exactly one section open at a time, persisted to cookie
+function initOffsetAccordion() {
+    const sections = Array.from(document.querySelectorAll('.offset-section'));
+    if (sections.length === 0) return;
+
+    const validRegions = sections.map(s => s.dataset.region);
+    const saved = getOffsetSectionCookie();
+    const openRegion = validRegions.includes(saved) ? saved : 'us';
+
+    const applyState = (activeRegion) => {
+        sections.forEach(section => {
+            const region = section.dataset.region;
+            const body = section.querySelector('.offset-section-body');
+            const indicator = section.querySelector('.offset-section-indicator');
+            const isOpen = region === activeRegion;
+            body.hidden = !isOpen;
+            indicator.innerHTML = isOpen ? '&#9660;' : '&#9654;';
+        });
+    };
+
+    applyState(openRegion);
+
+    sections.forEach(section => {
+        const header = section.querySelector('.offset-section-header');
+        header.addEventListener('click', () => {
+            const region = section.dataset.region;
+            const body = section.querySelector('.offset-section-body');
+            // Exactly one must remain open; clicking the open section is a no-op
+            if (!body.hidden) return;
+            applyState(region);
+            setOffsetSectionCookie(region);
+        });
+    });
+}
+
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     ClockApp.init();
     initChangelog();
     initSettings();
+    initOffsetAccordion();
 });
