@@ -2,7 +2,7 @@
 
 A web application for displaying and synchronizing multiple time zones simultaneously. Designed for coordinating across global teams and managing international schedules.
 
-Check it out [HERE!](https://clock.360balancedliving.com "See the clocks!"){:target="_blank"}.
+Check it out [HERE!](https://clock.360balancedliving.com "See the clocks!").
 
 ## Features
 
